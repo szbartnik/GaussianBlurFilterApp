@@ -1,8 +1,12 @@
 ﻿<Application x:Class="Gauss.GUI.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             xmlns:converters="clr-namespace:Gauss.GUI.Converters"
+             StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-         
+        <converters:ByteArrayToBitmapImageConverter x:Key="ByteArrayToBitmapImageConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
     </Application.Resources>
 </Application>

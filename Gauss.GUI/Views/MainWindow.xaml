@@ -1,0 +1,77 @@
+﻿<Window x:Class="Gauss.GUI.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Gauss.GUI.ViewModels"
+        xmlns:converters="clr-namespace:Gauss.GUI.Converters"
+        mc:Ignorable="d" MinHeight="600" MinWidth="1000" Background="DimGray"
+        Title="Gauss Blur - Szymon Bartnik (Silesian University Of Technology)" Height="600" Width="1000" 
+        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel, IsDesignTimeCreatable=True}">
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" BorderBrush="DeepSkyBlue" BorderThickness="1">
+            <Grid>
+                <Image Visibility="{Binding MainPanelImage, Converter={StaticResource NullToVisibilityConverter}}" 
+                       Source="{Binding MainPanelImage, Converter={StaticResource ByteArrayToBitmapImageConverter}, Mode=OneWay}" />
+                <Canvas AllowDrop="True" Background="{Binding ImageDropContainerBackground}" Opacity="0.7" ZIndex="100"
+                        Drop="UIElement_OnDrop" Visibility="{Binding MainPanelImage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                        DragOver="UIElement_OnDragOver" 
+                        DragLeave="UIElement_OnDragLeave" />
+                <TextBlock Text="{Binding MainPanelDescription}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+        <StackPanel Grid.Column="1" Margin="20 0 0 0">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Background="White">
+                <TextBlock Text="Settings" Margin="0 0 0 3" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+                <StackPanel>
+                    <TextBlock Text="Number of threads:" FontSize="12" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ElementName=ThreadsSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
+                    <Slider x:Name="ThreadsSlider" Minimum="1" Maximum="8" VerticalAlignment="Center" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding NumberOfThreads}"
+                            IsEnabled="{Binding ElementName=TreadsAutodetectCheckbox, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}}" />
+                    <CheckBox x:Name="TreadsAutodetectCheckbox" Content="Autodetect number of cores"  
+                              Command="{Binding IsThreadAutodetectCheckedCommand}" 
+                              CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Self}}"
+                              Margin="0 5 5 5" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+                <StackPanel>
+                    <TextBlock Text="Blur level:" FontSize="12" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ElementName=BlurLevelSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
+                    <Slider x:Name="BlurLevelSlider" Minimum="1" Maximum="100" VerticalAlignment="Center" Interval="1" IsSnapToTickEnabled="True" Value="{Binding BlurLevel}"/>
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+                <StackPanel>
+                    <TextBlock Text="Generating library:" FontSize="12" VerticalAlignment="Center" Margin="0 0 0 5"/>
+                    <RadioButton Content="Assembly" Margin="20 0 0 0"
+                                 IsChecked="{Binding GeneratingLibrary, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=ASM}" />
+                    <RadioButton Content="C++" Margin="20 0 0 0"
+                                 IsChecked="{Binding GeneratingLibrary, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=CPP}" />
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+                <StackPanel>
+                    <TextBlock Text="Generation time:" FontSize="12" VerticalAlignment="Center" Margin="0 0 0 5"/>
+                    <TextBlock FontSize="40" HorizontalAlignment="Center" Margin="0 -12 0 -3">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0:d2}s {1:d3}ms">
+                                <Binding Path="GenerationTime.Seconds" />
+                                <Binding Path="GenerationTime.Milliseconds" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            <Button Content="Generate blurred image" Command="{Binding GenerateBlurredImageCommand}" Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"/>
+        </StackPanel>
+        
+    </Grid>
+</Window>
