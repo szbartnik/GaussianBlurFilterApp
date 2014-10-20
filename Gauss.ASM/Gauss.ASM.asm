@@ -5,13 +5,13 @@
 .data
 .code
 
-GetInt proc uses ebx a:DWORD, b:DWORD
+AddASM proc uses ebx a:DWORD, b:DWORD
 
 mov eax,a
 mov ebx,b
 add eax, ebx
 ret
 
-GetInt endp 
+AddASM endp 
 
 end 
