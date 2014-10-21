@@ -44,7 +44,7 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 	unsigned char* tmp = new unsigned char[row_padded];
 	for (int y = 0; y < height; y++)
 	{
-		memcpy(tmp, imgArr + (54 + y * row_padded) * sizeof(unsigned char), sizeof(unsigned char) * row_padded);
+		memcpy(tmp, &imgArr[54 + y * row_padded], sizeof(unsigned char) * row_padded);
 		pixels[y] = new Pixel[width];
 
 		for (int x = 0; x < width; x++)
@@ -133,7 +133,8 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 
 	for (int y = 0; y < height; y++)
 	for (int x = 0; x < width; x++){
-		memcpy(imgArr + (54 + (y*width + x)*sizeof(unsigned char)), &pixels[y][x], sizeof(unsigned char));
+		memcpy(&imgArr[54 + (y * width + x) * 3], &pixels[y][x], sizeof(unsigned char) * 3);
+
 	}
 
 	return imgArr;
