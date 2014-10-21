@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Gauss.GUI.Core;
@@ -138,12 +139,14 @@ namespace Gauss.GUI.ViewModels
                 if (ImageManager == null) return;
 
                 ImageManager.ImageComputed += ImageManager_ImageComputed;
-                await ImageManager.GenerateBlurredImageAsync(new ComputingProcessImageParameters
-                {
-                    NumberOfThreads = NumberOfThreads,
-                    BlurLevel = BlurLevel,
-                    GeneratingLibrary = GeneratingLibrary,
-                });
+                await Task.Run(() => ImageManager.GenerateBlurredImageAsync(
+                    new ComputingProcessImageParameters
+                    {
+                        NumberOfThreads = NumberOfThreads,
+                        BlurLevel = BlurLevel,
+                        GeneratingLibrary = GeneratingLibrary,
+                    }
+                ));
             });
 
             IsThreadAutodetectCheckedCommand = new RelayCommand<bool>(isChecked =>
@@ -157,7 +160,7 @@ namespace Gauss.GUI.ViewModels
 
         void ImageManager_ImageComputed(ImageComputedEventArgs e)
         {
-            throw new NotImplementedException();
+            MainPanelImage = e.ResultImage;
         }
 
         private void SetDropImageZoneState(DropImagesZoneState imagesZoneState)

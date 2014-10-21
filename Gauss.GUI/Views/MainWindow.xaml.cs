@@ -9,7 +9,6 @@ namespace Gauss.GUI.Views
         public MainWindow()
         {
             InitializeComponent();
-
             DataContext = new MainWindowViewModel();
         }
 
