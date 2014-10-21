@@ -45,6 +45,7 @@ namespace Gauss.GUI.ViewModels
             {
                 if (ImageManager == null) return;
                 ProgramState = ProgramState.Computing;
+                _computationStopwatch.Start();
 
                 ImageManager.ImageComputed += ImageManager_ImageComputed;
                 await Task.Run(() => ImageManager.GenerateBlurredImageAsync(
@@ -55,8 +56,6 @@ namespace Gauss.GUI.ViewModels
                         GeneratingLibrary = GeneratingLibrary,
                     }
                     ));
-
-                ProgramState = ProgramState.Computed;
             });
         }
 

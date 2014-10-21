@@ -10,11 +10,19 @@ namespace Gauss.GUI.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            bool inverse = false;
+
             if (value == null || parameter == null) return false;
             string enumValue = value.ToString();
             string targetValue = parameter.ToString();
+            if (targetValue.StartsWith("!"))
+            {
+                inverse = true;
+                targetValue = targetValue.Substring(1);
+            }
+
             bool outputValue = enumValue.Equals(targetValue, StringComparison.InvariantCultureIgnoreCase);
-            return outputValue;
+            return inverse ? !outputValue : outputValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

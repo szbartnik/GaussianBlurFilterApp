@@ -60,6 +60,7 @@
     <Compile Include="Converters\EnumToVisibilityConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="Core\ComputationStopwatch.cs" />
     <Compile Include="Models\EventArgs\ImageComputedEventArgs.cs" />
     <Compile Include="Infrastructure\RelayCommand.cs" />
     <Compile Include="Infrastructure\Utils.cs" />

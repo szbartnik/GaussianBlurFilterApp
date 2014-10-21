@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using System.Windows;
 using System.Windows.Media;
 using Gauss.GUI.Core;
@@ -13,6 +14,7 @@ namespace Gauss.GUI.ViewModels
     {
         private GaussImageManager ImageManager { get; set; }
         private string _mainPanelImagePath;
+        private readonly ComputationStopwatch _computationStopwatch;
 
         #region Properties
 
@@ -68,18 +70,6 @@ namespace Gauss.GUI.ViewModels
         }
         private int _numberOfThreads;
 
-        public TimeSpan GenerationTime
-        {
-            get { return _generationTime; }
-            set
-            {
-                if (value.Equals(_generationTime)) return;
-                _generationTime = value;
-                OnPropertyChanged();
-            }
-        }
-        private TimeSpan _generationTime;
-
         public int BlurLevel
         {
             get { return _blurLevel; }
@@ -116,6 +106,18 @@ namespace Gauss.GUI.ViewModels
         }
         private ProgramState _programState;
 
+        public TimeSpan ComputationTime
+        {
+            get { return _computationTime; }
+            set
+            {
+                if (value.Equals(_computationTime)) return;
+                _computationTime = value;
+                OnPropertyChanged();
+            }
+        }
+        private TimeSpan _computationTime;
+
         #endregion
 
         #region Constructor
@@ -124,6 +126,9 @@ namespace Gauss.GUI.ViewModels
         {
             InitializeCommands();
             InitializeProperties();
+
+            _computationStopwatch = new ComputationStopwatch(TimeSpan.FromMilliseconds(10));
+            _computationStopwatch.Updated += updatedTime => { ComputationTime = updatedTime; };
         }
 
         #endregion
@@ -140,7 +145,9 @@ namespace Gauss.GUI.ViewModels
         void ImageManager_ImageComputed(ImageComputedEventArgs e)
         {
             MainPanelImage = e.ResultImage;
-            ProgramState = ProgramState.NoImageLoaded;
+            ProgramState = ProgramState.Computed;
+
+            _computationStopwatch.Stop();
         }
 
         private void SetDropImageZoneState(DropImagesZoneState imagesZoneState)

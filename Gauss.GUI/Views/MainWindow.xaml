@@ -25,7 +25,7 @@
                 <TextBlock Text="{Binding MainPanelDescription}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
         </Border>
-        <StackPanel Grid.Column="1" Margin="20 0 0 0">
+        <StackPanel Grid.Column="1" Margin="20 0 0 0" IsEnabled="{Binding ProgramState, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=!Computing}">
             <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Background="White">
                 <TextBlock Text="Settings" Margin="0 0 0 3" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
@@ -59,12 +59,12 @@
             </Border>
             <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
-                    <TextBlock Text="Generation time:" FontSize="12" VerticalAlignment="Center" Margin="0 0 0 5"/>
+                    <TextBlock Text="Last generation time:" FontSize="12" VerticalAlignment="Center" Margin="0 0 0 5"/>
                     <TextBlock FontSize="40" HorizontalAlignment="Center" Margin="0 -12 0 -3">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0:d2}s {1:d3}ms">
-                                <Binding Path="GenerationTime.Seconds" />
-                                <Binding Path="GenerationTime.Milliseconds" />
+                                <Binding Path="ComputationTime.Seconds" />
+                                <Binding Path="ComputationTime.Milliseconds" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>
@@ -73,7 +73,7 @@
             <Button Content="Generate blurred image" Command="{Binding GenerateBlurredImageCommand}" 
                     Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"
                     Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=ImageLoaded}"/>
-            <TextBlock Text="Computing image..." FontWeight="Bold" 
+            <TextBlock Text="Computing image..." FontWeight="Bold" FontSize="20"
                        Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computing}"
                        HorizontalAlignment="Center" Foreground="GreenYellow" />
             <Grid Visibility="{Binding }">
