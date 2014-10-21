@@ -11,6 +11,8 @@ namespace Gauss.GUI.ViewModels
 {
     public sealed partial class MainWindowViewModel : ViewModelBase
     {
+        private GaussImageManager ImageManager { get; set; }
+
         #region Commands
 
         public RelayCommand GenerateBlurredImageCommand { get; private set; }
@@ -118,12 +120,25 @@ namespace Gauss.GUI.ViewModels
             InitializeProperties();
         }
 
+        #endregion
+
+        private void InitializeProperties()
+        {
+            NumberOfThreads = 1;
+            BlurLevel = 40;
+            GeneratingLibrary = GeneratingLibrary.ASM;
+
+            SetDropImageZoneState(DropImagesZoneState.Idle);
+        }
+
         private void InitializeCommands()
         {
-            GenerateBlurredImageCommand = new RelayCommand(() =>
+            GenerateBlurredImageCommand = new RelayCommand(async ()  =>
             {
                 if (ImageManager == null) return;
-                ImageManager.GenerateBlurredImage(new ComputingProcessImageParameters
+
+                ImageManager.ImageComputed += ImageManager_ImageComputed;
+                await ImageManager.GenerateBlurredImageAsync(new ComputingProcessImageParameters
                 {
                     NumberOfThreads = NumberOfThreads,
                     BlurLevel = BlurLevel,
@@ -140,18 +155,10 @@ namespace Gauss.GUI.ViewModels
             });
         }
 
-        #endregion
-
-        private void InitializeProperties()
+        void ImageManager_ImageComputed(ImageComputedEventArgs e)
         {
-            NumberOfThreads = 1;
-            BlurLevel = 40;
-            GeneratingLibrary = GeneratingLibrary.ASM;
-
-            SetDropImageZoneState(DropImagesZoneState.Idle);
+            throw new NotImplementedException();
         }
-
-        private GaussImageManager ImageManager { get; set; }
 
         private void SetDropImageZoneState(DropImagesZoneState imagesZoneState)
         {
@@ -201,10 +208,10 @@ namespace Gauss.GUI.ViewModels
             SetDropImageZoneState(DropImagesZoneState.Dropped);
 
             var filenames = dragEventArgs.Data.GetData(DataFormats.FileDrop, true) as string[];
-            ImageManager = new GaussImageManager(filenames);
-
+            
             try
             {
+                ImageManager = new GaussImageManager(filenames);
                 MainPanelImage = File.ReadAllBytes(filenames.First());
             }
             catch (Exception e)
