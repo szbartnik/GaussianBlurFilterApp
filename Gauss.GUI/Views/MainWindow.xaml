@@ -70,7 +70,24 @@
                     </TextBlock>
                 </StackPanel>
             </Border>
-            <Button Content="Generate blurred image" Command="{Binding GenerateBlurredImageCommand}" Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"/>
+            <Button Content="Generate blurred image" Command="{Binding GenerateBlurredImageCommand}" 
+                    Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"
+                    Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=ImageLoaded}"/>
+            <TextBlock Text="Computing image..." FontWeight="Bold" 
+                       Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computing}"
+                       HorizontalAlignment="Center" Foreground="GreenYellow" />
+            <Grid Visibility="{Binding }">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Content="Save" Command="{Binding SaveBlurredImageCommand}" 
+                        Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computed}"
+                        Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"/>
+                <Button Grid.Column="1" Content="New" Command="{Binding NewImageCommand}"
+                        Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computed|ImageLoaded}"
+                        Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"/>
+            </Grid>
         </StackPanel>
         
     </Grid>

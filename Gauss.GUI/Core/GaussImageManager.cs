@@ -51,6 +51,7 @@ namespace Gauss.GUI.Core
             {
                 ImageComputed(new ImageComputedEventArgs(TimeSpan.Zero, SourceFile));
             }
+
             MessageBox.Show(processImageParameters.ToString());
         }
     }

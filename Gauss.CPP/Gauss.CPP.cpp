@@ -65,15 +65,13 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 
 	double linc_r, linc_g, linc_b;
 
-	const int gauss_w = 25; // must be odd
+	const int gauss_w = 27; // must be odd
 	int gauss_sum = 0;
 
 	int* mask = ComputePascalRow(gauss_w - 1);
 	for (int i = 0; i < gauss_w; i++){
 		gauss_sum += mask[i];
 	}
-
-	unsigned char R, G, B;
 
 	//For every pixel on the temporary bitmap ...
 	for (int i = gauss_w - 1; i<height; i++)
@@ -127,15 +125,9 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 		}
 	}
 
-	unsigned char bmppad[3] = { 0, 0, 0 };
-	
-	int currPosition = 54;
-
 	for (int y = 0; y < height; y++)
-	for (int x = 0; x < width; x++){
-		memcpy(&imgArr[54 + (y * width + x) * 3], &pixels[y][x], sizeof(unsigned char) * 3);
-
-	}
+		for (int x = 0; x < width; x++)
+			memcpy(&imgArr[54 + (y * width + x) * 3], &pixels[y][x], sizeof(unsigned char) * 3);
 
 	return imgArr;
 }

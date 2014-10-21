@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Gauss.GUI.Core;
@@ -13,13 +12,7 @@ namespace Gauss.GUI.ViewModels
     public sealed partial class MainWindowViewModel : ViewModelBase
     {
         private GaussImageManager ImageManager { get; set; }
-
-        #region Commands
-
-        public RelayCommand GenerateBlurredImageCommand { get; private set; }
-        public RelayCommand<bool> IsThreadAutodetectCheckedCommand { get; private set; }
-
-        #endregion
+        private string _mainPanelImagePath;
 
         #region Properties
 
@@ -111,6 +104,18 @@ namespace Gauss.GUI.ViewModels
         }
         private GeneratingLibrary _generatingLibrary;
 
+        public ProgramState ProgramState
+        {
+            get { return _programState; }
+            set
+            {
+                if (Equals(value, _programState)) return;
+                _programState = value;
+                OnPropertyChanged();
+            }
+        }
+        private ProgramState _programState;
+
         #endregion
 
         #region Constructor
@@ -132,35 +137,10 @@ namespace Gauss.GUI.ViewModels
             SetDropImageZoneState(DropImagesZoneState.Idle);
         }
 
-        private void InitializeCommands()
-        {
-            GenerateBlurredImageCommand = new RelayCommand(async ()  =>
-            {
-                if (ImageManager == null) return;
-
-                ImageManager.ImageComputed += ImageManager_ImageComputed;
-                await Task.Run(() => ImageManager.GenerateBlurredImageAsync(
-                    new ComputingProcessImageParameters
-                    {
-                        NumberOfThreads = NumberOfThreads,
-                        BlurLevel = BlurLevel,
-                        GeneratingLibrary = GeneratingLibrary,
-                    }
-                ));
-            });
-
-            IsThreadAutodetectCheckedCommand = new RelayCommand<bool>(isChecked =>
-            {
-                if (isChecked)
-                {
-                    NumberOfThreads = Environment.ProcessorCount;
-                }
-            });
-        }
-
         void ImageManager_ImageComputed(ImageComputedEventArgs e)
         {
             MainPanelImage = e.ResultImage;
+            ProgramState = ProgramState.NoImageLoaded;
         }
 
         private void SetDropImageZoneState(DropImagesZoneState imagesZoneState)
@@ -194,6 +174,18 @@ namespace Gauss.GUI.ViewModels
             MainPanelDescription = textToSet;
         }
 
+        private void SaveShowingImage(string path)
+        {
+            try
+            {
+                File.WriteAllBytes(path, MainPanelImage);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
         #region GUI Events
 
         public void OnImageDragOver(bool areImagesValid)
@@ -215,7 +207,13 @@ namespace Gauss.GUI.ViewModels
             try
             {
                 ImageManager = new GaussImageManager(filenames);
-                MainPanelImage = File.ReadAllBytes(filenames.First());
+
+                var fileName = filenames.First();
+
+                MainPanelImage = File.ReadAllBytes(fileName);
+                _mainPanelImagePath = fileName;
+
+                ProgramState = ProgramState.ImageLoaded;
             }
             catch (Exception e)
             {

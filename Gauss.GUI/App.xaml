@@ -8,5 +8,6 @@
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+        <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
     </Application.Resources>
 </Application>
