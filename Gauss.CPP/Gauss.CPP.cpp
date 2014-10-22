@@ -30,12 +30,8 @@ int* ComputePascalRow(int n){
 
 unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight)
 {
-	unsigned char info[54];
-
-	memcpy(info, imgArr, sizeof(unsigned char) * 54);
-
-	int width = *(int*)&info[18];
-	int height = *(int*)&info[22];
+	int width = *(int*)&imgArr[18];
+	int height = *(int*)&imgArr[22];
 
 	int row_padded = (width * 3 + 3) & (~3);
 
@@ -58,7 +54,7 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 		}
 	}
 
-	delete tmp;
+	delete[] tmp;
 
 	Pixel** temp = CopyPixels(pixels, height, width);
 	Pixel color;
@@ -125,9 +121,10 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 		}
 	}
 
+	delete[] mask;
+
 	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++)
-			memcpy(&imgArr[54 + (y * width + x) * 3], &pixels[y][x], sizeof(unsigned char) * 3);
+		memcpy(&imgArr[54 + y * width * 3], pixels[y], sizeof(unsigned char) * 3 * width);
 
 	return imgArr;
 }

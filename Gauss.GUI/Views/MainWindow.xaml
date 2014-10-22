@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Gauss.GUI.ViewModels"
-        xmlns:converters="clr-namespace:Gauss.GUI.Converters"
         mc:Ignorable="d" MinHeight="600" MinWidth="1000" Background="DimGray"
         Title="Gauss Blur - Szymon Bartnik (Silesian University Of Technology)" Height="600" Width="1000" 
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel, IsDesignTimeCreatable=True}">
