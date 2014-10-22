@@ -47,7 +47,7 @@ namespace Gauss.GUI.Core
                 tasks[threadNum] = Task.Run(() =>
                 {
                     var currentThreadParams = ComputeThreadParams(
-                        threadNum: num, 
+                        threadId: num, 
                         generatorParams: generatorParams,
                         imageSizes: imgSizes);
 
@@ -72,19 +72,52 @@ namespace Gauss.GUI.Core
             return new Size<int>(width, height);
         }
 
-        private ThreadParameters ComputeThreadParams(int threadNum, GeneratorParameters generatorParams, Size<int> imageSizes)
+        private ThreadParameters ComputeThreadParams(int threadId, GeneratorParameters generatorParams, Size<int> imageSizes)
         {
-            //var imagePartArrayPtr = 
+            int rowPadded = (imageSizes.Width * 3 + 3) & (~3);
+            int currentThreadImgHeight = 0;
+            int sumOfOffsetLines = 0;
+
+
+            for (int i = 0; i <= threadId; i++) 
+            {
+                var numOfLinesOfCurrentThread = ComputeNumberOfLinesPerThread(
+                    threadId:      i,
+                    numOfThreads:  generatorParams.NumberOfThreads,
+                    gaussMaskSize: generatorParams.GaussMaskSize,
+                    imgHeight:     imageSizes.Height);
+
+                if (i == threadId)
+                    currentThreadImgHeight = numOfLinesOfCurrentThread;
+                else
+                    sumOfOffsetLines += numOfLinesOfCurrentThread;
+            }
 
             return new ThreadParameters
             {
-                GaussMaskSize   = generatorParams.GaussMaskSize,
-                BlurLevel       = generatorParams.BlurLevel,
-                ImgWidth        = imageSizes.Width,
-                ImgHeight       = imageSizes.Height,
-                IdOfImgPart     = threadNum,
-                NumOfImgParts   = generatorParams.NumberOfThreads,
+                CurrentImgOffset = sumOfOffsetLines * rowPadded,
+                GaussMaskSize    = generatorParams.GaussMaskSize,
+                BlurLevel        = generatorParams.BlurLevel,
+                ImgWidth         = imageSizes.Width,
+                ImgHeight        = currentThreadImgHeight,
+                IdOfImgPart      = threadId,
+                NumOfImgParts    = generatorParams.NumberOfThreads,
             };
+        }
+
+        private int ComputeNumberOfLinesPerThread(int threadId, int numOfThreads, int gaussMaskSize, int imgHeight)
+        {
+            var numOfLinesPerThread = imgHeight / numOfThreads;
+
+            if (numOfThreads > 1)
+            {
+                if ((threadId == 0 || threadId == (numOfThreads - 1)))
+                    numOfLinesPerThread += gaussMaskSize / 2;
+                else
+                    numOfLinesPerThread += gaussMaskSize - 1;
+            }
+
+            return numOfLinesPerThread;
         }
 
         private unsafe void RunUnsafeImageGenerationCode(ThreadParameters currentThreadParams, GeneratingLibrary genLibrary)
