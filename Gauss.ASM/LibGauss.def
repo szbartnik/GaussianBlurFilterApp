@@ -1,2 +1,2 @@
 LIBRARY "Gauss_ASM"
-EXPORTS AddASM
+EXPORTS ComputeGaussBlur

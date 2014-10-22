@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Gauss.GUI.Infrastructure;
 using Gauss.GUI.Models;
+using Gauss.GUI.Models.RunParameters;
 using Microsoft.Win32;
 
 namespace Gauss.GUI.ViewModels
@@ -46,15 +47,15 @@ namespace Gauss.GUI.ViewModels
                 ProgramState = ProgramState.Computing;
                 _computationStopwatch.Start();
 
-                ImageManager.ImageComputed += ImageManager_ImageComputed;
-                await Task.Run(() => ImageManager.GenerateBlurredImageAsync(
-                    new ComputingProcessImageParameters
-                    {
-                        NumberOfThreads = NumberOfThreads,
-                        BlurLevel = BlurLevel,
-                        GeneratingLibrary = GeneratingLibrary,
-                    }
-                    ));
+                MainPanelImage = await ImageManager.GenerateBlurredImageAsync(new GeneratorParameters
+                {
+                    NumberOfThreads = NumberOfThreads,
+                    BlurLevel = BlurLevel,
+                    GeneratingLibrary = GeneratingLibrary,
+                });
+
+                ProgramState = ProgramState.Computed;
+                _computationStopwatch.Stop();
             });
         }
 

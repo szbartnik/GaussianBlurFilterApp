@@ -28,7 +28,7 @@ int* ComputePascalRow(int n){
 	return row;
 }
 
-unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight)
+unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight)
 {
 	int width = *(int*)&imgArr[18];
 	int height = *(int*)&imgArr[22];

@@ -60,17 +60,18 @@
     <Compile Include="Converters\EnumToVisibilityConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
-    <Compile Include="Core\ComputationStopwatch.cs" />
-    <Compile Include="Models\EventArgs\ImageComputedEventArgs.cs" />
+    <Compile Include="Core\GeneratorStopwatch.cs" />
+    <Compile Include="Models\RunParameters\ThreadParameters.cs" />
     <Compile Include="Infrastructure\RelayCommand.cs" />
     <Compile Include="Infrastructure\Utils.cs" />
     <Compile Include="Infrastructure\ViewModelBase.cs" />
     <Compile Include="Models\GeneratingLibrary.cs" />
     <Compile Include="Models\ProgramState.cs" />
+    <Compile Include="Models\Size.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Models\DropImagesZoneState.cs" />
     <Compile Include="Core\GaussImageManager.cs" />
-    <Compile Include="Models\ComputingProcessImageParameters.cs" />
+    <Compile Include="Models\RunParameters\GeneratorParameters.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.Main.cs" />
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

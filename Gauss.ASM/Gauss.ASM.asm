@@ -5,13 +5,13 @@
 .data
 .code
 
-AddASM proc uses ebx a:DWORD, b:DWORD
+ComputeGaussBlur proc uses ebx a:DWORD, b:DWORD
 
 mov eax,a
 mov ebx,b
 add eax, ebx
 ret
 
-AddASM endp 
+ComputeGaussBlur endp 
 
 end 

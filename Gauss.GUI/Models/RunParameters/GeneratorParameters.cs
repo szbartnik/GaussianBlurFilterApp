@@ -1,8 +1,8 @@
 using System;
 
-namespace Gauss.GUI.Models
+namespace Gauss.GUI.Models.RunParameters
 {
-    public class ComputingProcessImageParameters
+    public class GeneratorParameters
     {
         public int NumberOfThreads { get; set; }
         public int BlurLevel { get; set; }

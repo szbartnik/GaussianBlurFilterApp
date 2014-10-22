@@ -3,7 +3,7 @@ using System.Timers;
 
 namespace Gauss.GUI.Core
 {
-    public class ComputationStopwatch
+    public class GeneratorStopwatch
     {
         public delegate void UpdatedEventHandler(TimeSpan updatedTime);
         public event UpdatedEventHandler Updated;
@@ -11,7 +11,7 @@ namespace Gauss.GUI.Core
         private readonly Timer _computationTimeTimer;
         private DateTime _computationStartTime;
 
-        public ComputationStopwatch(TimeSpan refreshInterval)
+        public GeneratorStopwatch(TimeSpan refreshInterval)
         {
             _computationTimeTimer = new Timer(refreshInterval.TotalSeconds);
             _computationTimeTimer.Elapsed += (o, e) =>

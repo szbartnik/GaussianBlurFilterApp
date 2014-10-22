@@ -14,7 +14,7 @@ namespace Gauss.GUI.ViewModels
     {
         private GaussImageManager ImageManager { get; set; }
         private string _mainPanelImagePath;
-        private readonly ComputationStopwatch _computationStopwatch;
+        private readonly GeneratorStopwatch _computationStopwatch;
 
         #region Properties
 
@@ -139,7 +139,7 @@ namespace Gauss.GUI.ViewModels
             InitializeCommands();
             InitializeProperties();
 
-            _computationStopwatch = new ComputationStopwatch(TimeSpan.FromMilliseconds(10));
+            _computationStopwatch = new GeneratorStopwatch(TimeSpan.FromMilliseconds(10));
             _computationStopwatch.Updated += updatedTime => { ComputationTime = updatedTime; };
         }
 
@@ -153,14 +153,6 @@ namespace Gauss.GUI.ViewModels
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
             InformationText = "Computing image...";
-        }
-
-        void ImageManager_ImageComputed(ImageComputedEventArgs e)
-        {
-            MainPanelImage = e.ResultImage;
-            ProgramState = ProgramState.Computed;
-
-            _computationStopwatch.Stop();
         }
 
         private void SetDropImageZoneState(DropImagesZoneState imagesZoneState)

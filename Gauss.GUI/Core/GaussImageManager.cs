@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using Gauss.GUI.Models;
+using Gauss.GUI.Models.RunParameters;
 
 namespace Gauss.GUI.Core
 {
@@ -12,16 +14,15 @@ namespace Gauss.GUI.Core
     {
         #region DLL Imports
 
-        [DllImport("Gauss.ASM.dll")]
+        [DllImport("Gauss.ASM.dll", EntryPoint = "ComputeGaussBlur")]
         private static extern unsafe byte* ComputeGaussBlurAsm(byte* imgArr, int blurLevel, int imgWidth, int imgHeight);
 
-        [DllImport("Gauss.CPP.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("Gauss.CPP.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]
         private static extern unsafe byte* ComputeGaussBlurCpp(byte* imgArr, int blurLevel, int imgWidth, int imgHeight);
 
-        #endregion
+        private int w, h;
 
-        public delegate void ImageComputedEventHandler(ImageComputedEventArgs e);
-        public event ImageComputedEventHandler ImageComputed;
+        #endregion
 
         private byte[] SourceFile { get; set; }
 
@@ -37,21 +38,58 @@ namespace Gauss.GUI.Core
             }
         }
 
-        public unsafe void GenerateBlurredImageAsync(ComputingProcessImageParameters processImageParameters)
+        public async Task<byte[]> GenerateBlurredImageAsync(GeneratorParameters generatorParams)
+        {
+            var tasks = new Task[generatorParams.NumberOfThreads];
+            var imgSizes = GetLoadedImageSizes();
+
+            for (int threadNum = 0; threadNum < tasks.Length; threadNum++)
+            {
+                int num = threadNum;
+                tasks[threadNum] = Task.Run(() =>
+                {
+                    var currentThreadParams = ComputeThreadParams(
+                        threadNum: num, 
+                        generatorParams: generatorParams,
+                        imageSizes: imgSizes);
+
+                    RunUnsafeImageGenerationCode(currentThreadParams);
+                });
+            }
+
+            await Task.WhenAll(tasks);
+            return SourceFile;
+        }
+
+        private unsafe Size<int> GetLoadedImageSizes()
+        {
+            int width, height;
+
+            fixed (byte* imgArray = SourceFile)
+            {
+                width =  *(int*)&imgArray[18];
+                height = *(int*)&imgArray[22];
+            }
+
+            return new Size<int>(width, height);
+        }
+
+        private ThreadParameters ComputeThreadParams(int threadNum, GeneratorParameters generatorParams, Size<int> imageSizes)
+        {
+            return new ThreadParameters
+            {
+                ThreadNumber = threadNum,
+                GeneratorParameters = generatorParams,
+                ImageSizes = imageSizes,
+            };
+        }
+
+        private unsafe void RunUnsafeImageGenerationCode(ThreadParameters currentThreadParams)
         {
             fixed (byte* imgArray = SourceFile)
             {
-                var result = ComputeGaussBlurCpp(imgArray, 100, SourceFile.Length, 0);
-                for (int i = 0; i < SourceFile.Length; i++)
-                    SourceFile[i] = result[i];
+                ComputeGaussBlurCpp(imgArray, 100, SourceFile.Length, 0);
             }
-
-            if (ImageComputed != null)
-            {
-                ImageComputed(new ImageComputedEventArgs(TimeSpan.Zero, SourceFile));
-            }
-
-            MessageBox.Show(processImageParameters.ToString());
         }
     }
 }

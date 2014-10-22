@@ -7,4 +7,4 @@ typedef struct Pixel {
 	unsigned char R;
 } Pixel;
 
-API unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight);
+API unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight);
