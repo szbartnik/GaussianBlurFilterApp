@@ -18,6 +18,18 @@ namespace Gauss.GUI.ViewModels
 
         #region Properties
 
+        public string InformationText
+        {
+            get { return _informationText; }
+            set
+            {
+                if (value == _informationText) return;
+                _informationText = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _informationText;
+
         public byte[] MainPanelImage
         {
             get { return _mainPanelImage; }
@@ -140,6 +152,7 @@ namespace Gauss.GUI.ViewModels
             GeneratingLibrary = GeneratingLibrary.ASM;
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
+            InformationText = "Computing image...";
         }
 
         void ImageManager_ImageComputed(ImageComputedEventArgs e)

@@ -16,9 +16,8 @@ namespace Gauss.GUI.ViewModels
         public RelayCommand<bool> IsThreadAutodetectCheckedCommand { get; private set; }
         public RelayCommand SaveBlurredImageCommand { get; private set; }
         public RelayCommand NewImageCommand { get; private set; }
-        public RelayCommand AbortComputingCommand { get; private set; }
 
-        #endregion
+       #endregion
 
         private void InitializeCommands()
         {

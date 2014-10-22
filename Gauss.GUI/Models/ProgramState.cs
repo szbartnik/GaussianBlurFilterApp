@@ -5,6 +5,7 @@
         NoImageLoaded,
         ImageLoaded,
         Computing,
+        ErrorsOccured,
         Computed,
     }
 }

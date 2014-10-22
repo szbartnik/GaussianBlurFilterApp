@@ -61,7 +61,7 @@ unsigned char* ComputeGaussBlurCpp(unsigned char* imgArr, int blurLevel, int img
 
 	double linc_r, linc_g, linc_b;
 
-	const int gauss_w = 27; // must be odd
+	const int gauss_w = 25; // must be odd
 	int gauss_sum = 0;
 
 	int* mask = ComputePascalRow(gauss_w - 1);
