@@ -30,6 +30,18 @@ namespace Gauss.GUI.ViewModels
         }
         private string _informationText;
 
+        public int GaussMaskSize
+        {
+            get { return _gaussMaskSize; }
+            set
+            {
+                if (Equals(value, _gaussMaskSize)) return;
+                _gaussMaskSize = value;
+                OnPropertyChanged();
+            }
+        }
+        private int _gaussMaskSize;
+
         public byte[] MainPanelImage
         {
             get { return _mainPanelImage; }
@@ -149,7 +161,8 @@ namespace Gauss.GUI.ViewModels
         {
             NumberOfThreads = 1;
             BlurLevel = 40;
-            GeneratingLibrary = GeneratingLibrary.ASM;
+            GeneratingLibrary = GeneratingLibrary.CPP;
+            GaussMaskSize = 25;
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
             InformationText = "Computing image...";

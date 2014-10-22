@@ -7,4 +7,16 @@ typedef struct Pixel {
 	unsigned char R;
 } Pixel;
 
-API unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight);
+struct ThreadParameters
+{
+	unsigned char* ImgByteArrayPtr;
+	int CurrentImgOffset;
+	int GaussMaskSize;
+	int BlurLevel;
+	int ImageWidth;
+	int ImageHeight;
+	int IdOfImgPart;
+	int NumOfImgParts;
+};
+
+API void ComputeGaussBlur(ThreadParameters threadParameters);

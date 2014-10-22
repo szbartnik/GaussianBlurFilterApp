@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
 using Gauss.GUI.Infrastructure;
 using Gauss.GUI.Models;
 using Gauss.GUI.Models.RunParameters;
@@ -18,7 +16,7 @@ namespace Gauss.GUI.ViewModels
         public RelayCommand SaveBlurredImageCommand { get; private set; }
         public RelayCommand NewImageCommand { get; private set; }
 
-       #endregion
+        #endregion
 
         private void InitializeCommands()
         {
@@ -51,6 +49,7 @@ namespace Gauss.GUI.ViewModels
                 {
                     NumberOfThreads = NumberOfThreads,
                     BlurLevel = BlurLevel,
+                    GaussMaskSize = GaussMaskSize,
                     GeneratingLibrary = GeneratingLibrary,
                 });
 

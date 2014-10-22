@@ -44,7 +44,14 @@
                 <StackPanel>
                     <TextBlock Text="Blur level:" FontSize="12" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding ElementName=BlurLevelSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
-                    <Slider x:Name="BlurLevelSlider" Minimum="1" Maximum="100" VerticalAlignment="Center" Interval="1" IsSnapToTickEnabled="True" Value="{Binding BlurLevel}"/>
+                    <Slider x:Name="BlurLevelSlider" Minimum="1" Maximum="100" VerticalAlignment="Center" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding BlurLevel}"/>
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+                <StackPanel>
+                    <TextBlock Text="Gauss mask size:" FontSize="12" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ElementName=GaussMaskSizeSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
+                    <Slider x:Name="GaussMaskSizeSlider" Minimum="3" Maximum="25" VerticalAlignment="Center" TickFrequency="2" IsSnapToTickEnabled="True" Value="{Binding GaussMaskSize}"/>
                 </StackPanel>
             </Border>
             <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">

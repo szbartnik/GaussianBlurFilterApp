@@ -7,6 +7,7 @@ namespace Gauss.GUI.Models.RunParameters
         public int NumberOfThreads { get; set; }
         public int BlurLevel { get; set; }
         public GeneratingLibrary GeneratingLibrary { get; set; }
+        public int GaussMaskSize { get; set; }
 
         public override string ToString()
         {

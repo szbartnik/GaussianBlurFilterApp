@@ -15,12 +15,10 @@ namespace Gauss.GUI.Core
         #region DLL Imports
 
         [DllImport("Gauss.ASM.dll", EntryPoint = "ComputeGaussBlur")]
-        private static extern unsafe byte* ComputeGaussBlurAsm(byte* imgArr, int blurLevel, int imgWidth, int imgHeight);
+        private static extern void ComputeGaussBlurAsm(ThreadParameters threadParameters);
 
         [DllImport("Gauss.CPP.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]
-        private static extern unsafe byte* ComputeGaussBlurCpp(byte* imgArr, int blurLevel, int imgWidth, int imgHeight);
-
-        private int w, h;
+        private static extern void ComputeGaussBlurCpp(ThreadParameters threadParameters);
 
         #endregion
 
@@ -53,7 +51,7 @@ namespace Gauss.GUI.Core
                         generatorParams: generatorParams,
                         imageSizes: imgSizes);
 
-                    RunUnsafeImageGenerationCode(currentThreadParams);
+                    RunUnsafeImageGenerationCode(currentThreadParams, generatorParams.GeneratingLibrary);
                 });
             }
 
@@ -76,19 +74,35 @@ namespace Gauss.GUI.Core
 
         private ThreadParameters ComputeThreadParams(int threadNum, GeneratorParameters generatorParams, Size<int> imageSizes)
         {
+            //var imagePartArrayPtr = 
+
             return new ThreadParameters
             {
-                ThreadNumber = threadNum,
-                GeneratorParameters = generatorParams,
-                ImageSizes = imageSizes,
+                GaussMaskSize   = generatorParams.GaussMaskSize,
+                BlurLevel       = generatorParams.BlurLevel,
+                ImgWidth        = imageSizes.Width,
+                ImgHeight       = imageSizes.Height,
+                IdOfImgPart     = threadNum,
+                NumOfImgParts   = generatorParams.NumberOfThreads,
             };
         }
 
-        private unsafe void RunUnsafeImageGenerationCode(ThreadParameters currentThreadParams)
+        private unsafe void RunUnsafeImageGenerationCode(ThreadParameters currentThreadParams, GeneratingLibrary genLibrary)
         {
             fixed (byte* imgArray = SourceFile)
             {
-                ComputeGaussBlurCpp(imgArray, 100, SourceFile.Length, 0);
+                currentThreadParams.ImgByteArrayPtr = (uint*)imgArray;
+
+                switch (genLibrary)
+                {
+                    case GeneratingLibrary.ASM:
+                        ComputeGaussBlurAsm(currentThreadParams);
+                        break;
+                    case GeneratingLibrary.CPP:
+                        ComputeGaussBlurCpp(currentThreadParams);
+                        break;
+                    default: throw new NotImplementedException();
+                }
             }
         }
     }

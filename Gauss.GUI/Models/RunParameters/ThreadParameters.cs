@@ -1,9 +1,17 @@
+using System.Runtime.InteropServices;
+
 namespace Gauss.GUI.Models.RunParameters
 {
-    public class ThreadParameters
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ThreadParameters
     {
-        public int ThreadNumber { get; set; }
-        public GeneratorParameters GeneratorParameters { get; set; }
-        public Size<int> ImageSizes { get; set; }
+        public unsafe uint* ImgByteArrayPtr;
+        public int CurrentImgOffset;
+        public int GaussMaskSize;
+        public int BlurLevel;
+        public int ImgWidth;
+        public int ImgHeight;
+        public int IdOfImgPart;
+        public int NumOfImgParts;
     }
 }

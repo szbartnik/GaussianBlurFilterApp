@@ -28,22 +28,19 @@ int* ComputePascalRow(int n){
 	return row;
 }
 
-unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWidth, int imgHeight)
+void ComputeGaussBlur(ThreadParameters params)
 {
-	int width = *(int*)&imgArr[18];
-	int height = *(int*)&imgArr[22];
+	int row_padded = (params.ImageWidth * 3 + 3) & (~3);
 
-	int row_padded = (width * 3 + 3) & (~3);
-
-	Pixel** pixels = new Pixel*[height];
+	Pixel** pixels = new Pixel*[params.ImageHeight];
 
 	unsigned char* tmp = new unsigned char[row_padded];
-	for (int y = 0; y < height; y++)
+	for (int y = 0; y < params.ImageHeight; y++)
 	{
-		memcpy(tmp, &imgArr[54 + y * row_padded], sizeof(unsigned char) * row_padded);
-		pixels[y] = new Pixel[width];
+		memcpy(tmp, &params.ImgByteArrayPtr[54 + y * row_padded], sizeof(unsigned char) * row_padded);
+		pixels[y] = new Pixel[params.ImageWidth];
 
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < params.ImageWidth; x++)
 		{
 			Pixel pixel;
 			pixel.B = tmp[x * 3];
@@ -56,7 +53,7 @@ unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWid
 
 	delete[] tmp;
 
-	Pixel** temp = CopyPixels(pixels, height, width);
+	Pixel** temp = CopyPixels(pixels, params.ImageHeight, params.ImageWidth);
 	Pixel color;
 
 	double linc_r, linc_g, linc_b;
@@ -70,9 +67,9 @@ unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWid
 	}
 
 	//For every pixel on the temporary bitmap ...
-	for (int i = gauss_w - 1; i<height; i++)
+	for (int i = gauss_w - 1; i<params.ImageHeight; i++)
 	{
-		for (int j = 0; j<width; j++)
+		for (int j = 0; j<params.ImageWidth; j++)
 		{
 			linc_r = 0;
 			linc_g = 0;
@@ -96,9 +93,9 @@ unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWid
 	}
 
 	//For every pixel on the output bitmap ...
-	for (int i = 0; i<height; i++)
+	for (int i = 0; i<params.ImageHeight; i++)
 	{
-		for (int j = gauss_w - 1; j<width; j++)
+		for (int j = gauss_w - 1; j<params.ImageWidth; j++)
 		{
 			linc_r = 0;
 			linc_g = 0;
@@ -123,8 +120,6 @@ unsigned char* ComputeGaussBlur(unsigned char* imgArr, int blurLevel, int imgWid
 
 	delete[] mask;
 
-	for (int y = 0; y < height; y++)
-		memcpy(&imgArr[54 + y * width * 3], pixels[y], sizeof(unsigned char) * 3 * width);
-
-	return imgArr;
+	for (int y = 0; y < params.ImageHeight; y++)
+		memcpy(&params.ImgByteArrayPtr[54 + y * params.ImageWidth * 3], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
 }
