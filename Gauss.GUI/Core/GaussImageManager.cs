@@ -124,7 +124,7 @@ namespace Gauss.GUI.Core
         {
             fixed (byte* imgArray = SourceFile)
             {
-                currentThreadParams.ImgByteArrayPtr = (uint*)imgArray;
+                currentThreadParams.ImgByteArrayPtr = (uint*)(&imgArray[54]);
 
                 switch (genLibrary)
                 {

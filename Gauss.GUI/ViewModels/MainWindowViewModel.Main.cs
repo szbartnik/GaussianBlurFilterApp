@@ -159,7 +159,7 @@ namespace Gauss.GUI.ViewModels
 
         private void InitializeProperties()
         {
-            NumberOfThreads = 1;
+            NumberOfThreads = 2;
             BlurLevel = 40;
             GeneratingLibrary = GeneratingLibrary.CPP;
             GaussMaskSize = 25;

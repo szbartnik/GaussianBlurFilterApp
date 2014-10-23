@@ -37,7 +37,7 @@ void ComputeGaussBlur(ThreadParameters params)
 	unsigned char* tmp = new unsigned char[row_padded];
 	for (int y = 0; y < params.ImageHeight; y++)
 	{
-		memcpy(tmp, &params.ImgByteArrayPtr[54 + y * row_padded], sizeof(unsigned char) * row_padded);
+		memcpy(tmp, &params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], sizeof(unsigned char) * row_padded);
 		pixels[y] = new Pixel[params.ImageWidth];
 
 		for (int x = 0; x < params.ImageWidth; x++)
