@@ -65,7 +65,7 @@ namespace Gauss.GUI.Core
 
             fixed (byte* imgArray = SourceFile)
             {
-                width =  *(int*)&imgArray[18];
+                width  = *(int*)&imgArray[18];
                 height = *(int*)&imgArray[22];
             }
 
@@ -92,6 +92,8 @@ namespace Gauss.GUI.Core
                 else
                     sumOfOffsetLines += numOfLinesOfCurrentThread;
             }
+
+            sumOfOffsetLines -= threadId*(generatorParams.GaussMaskSize - 1);
 
             return new ThreadParameters
             {

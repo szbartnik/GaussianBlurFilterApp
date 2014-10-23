@@ -121,5 +121,5 @@ void ComputeGaussBlur(ThreadParameters params)
 	delete[] mask;
 
 	for (int y = 0; y < params.ImageHeight; y++)
-		memcpy(&params.ImgByteArrayPtr[54 + y * params.ImageWidth * 3], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
+		memcpy(&params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
 }

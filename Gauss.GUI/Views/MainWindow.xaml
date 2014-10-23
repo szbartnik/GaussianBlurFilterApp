@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Gauss.GUI.ViewModels"
-        mc:Ignorable="d" MinHeight="600" MinWidth="1000" Background="DimGray"
-        Title="Gauss Blur - Szymon Bartnik (Silesian University Of Technology)" Height="600" Width="1000" 
+        mc:Ignorable="d" MinHeight="700" MinWidth="1200" Background="DimGray"
+        Title="Gauss Blur - Szymon Bartnik (Silesian University Of Technology)" Height="680" Width="1150" 
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel, IsDesignTimeCreatable=True}">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
@@ -13,7 +13,7 @@
             <ColumnDefinition Width="250" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" BorderBrush="DeepSkyBlue" BorderThickness="1">
+        <Border Grid.Column="0" BorderBrush="DeepSkyBlue" BorderThickness="3">
             <Grid>
                 <Image Visibility="{Binding MainPanelImage, Converter={StaticResource NullToVisibilityConverter}}" 
                        Source="{Binding MainPanelImage, Converter={StaticResource ByteArrayToBitmapImageConverter}, Mode=OneWay}" />
@@ -25,10 +25,10 @@
             </Grid>
         </Border>
         <StackPanel Grid.Column="1" Margin="20 0 0 0" IsEnabled="{Binding ProgramState, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=!Computing}">
-            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Background="White">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Background="White">
                 <TextBlock Text="Settings" Margin="0 0 0 3" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
-            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
                     <TextBlock Text="Number of threads:" FontSize="12" VerticalAlignment="Center" />
                     <TextBlock Text="{Binding ElementName=ThreadsSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
@@ -40,21 +40,21 @@
                               Margin="0 5 5 5" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </StackPanel>
             </Border>
-            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
                     <TextBlock Text="Blur level:" FontSize="12" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding ElementName=BlurLevelSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
                     <Slider x:Name="BlurLevelSlider" Minimum="1" Maximum="100" VerticalAlignment="Center" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding BlurLevel}"/>
                 </StackPanel>
             </Border>
-            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
                     <TextBlock Text="Gauss mask size:" FontSize="12" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding ElementName=GaussMaskSizeSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
                     <Slider x:Name="GaussMaskSizeSlider" Minimum="3" Maximum="25" VerticalAlignment="Center" TickFrequency="2" IsSnapToTickEnabled="True" Value="{Binding GaussMaskSize}"/>
                 </StackPanel>
             </Border>
-            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
                     <TextBlock Text="Generating library:" FontSize="12" VerticalAlignment="Center" Margin="0 0 0 5"/>
                     <RadioButton Content="Assembly" Margin="20 0 0 0"
@@ -63,7 +63,7 @@
                                  IsChecked="{Binding GeneratingLibrary, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=CPP}" />
                 </StackPanel>
             </Border>
-            <Border BorderBrush="DeepSkyBlue" BorderThickness="1" Margin="0 0 0 10" Padding="5" Background="White">
+            <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
                     <TextBlock Text="Last generation time:" FontSize="12" VerticalAlignment="Center" Margin="0 0 0 5"/>
                     <TextBlock FontSize="40" HorizontalAlignment="Center" Margin="0 -12 0 -3">
@@ -80,17 +80,17 @@
                        Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computing}"
                        HorizontalAlignment="Center" Foreground="GreenYellow" />
             <Button Content="Generate blurred image" Command="{Binding GenerateBlurredImageCommand}" 
-                    Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"
+                    Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue" Margin="0 0 0 2"
                     Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=ImageLoaded}"/>
             <Grid Visibility="{Binding }">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Content="Save" Command="{Binding SaveBlurredImageCommand}" 
+                <Button Content="Save" Command="{Binding SaveBlurredImageCommand}" Margin="0 0 1 0"
                         Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computed}"
                         Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"/>
-                <Button Grid.Column="1" Content="New" Command="{Binding NewImageCommand}"
+                <Button Grid.Column="1" Content="New" Command="{Binding NewImageCommand}" Margin="1 0 0 0"
                         Visibility="{Binding ProgramState, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Computed|ImageLoaded}"
                         Foreground="White" Height="50" FontSize="17" Background="DeepSkyBlue"/>
             </Grid>
