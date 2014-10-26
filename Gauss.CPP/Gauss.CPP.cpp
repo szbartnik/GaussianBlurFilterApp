@@ -77,20 +77,27 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	//For every pixel on the temporary bitmap ...
-	for (int i = gaussHalf; i < params.ImageHeight - gaussHalf; i++)
+	for (int y = 0; y < params.ImageHeight; y++)
 	{
-		for (int j = gaussHalf; j<params.ImageWidth - gaussHalf; j++)
+		for (int x = 0; x < params.ImageWidth; x++)
 		{
 			linc_r = 0;
 			linc_g = 0;
 			linc_b = 0;
 
+			int currY;
+
 			for (int k = 0; k<gauss_w; k++)
 			{
-				color = pixels[i - gaussHalf + k][j];
-				linc_r += color.R * mask[k];
-				linc_g += color.G * mask[k];
-				linc_b += color.B * mask[k];
+				currY = y - gaussHalf + k;
+
+				if (currY >= 0 && currY < params.ImageHeight)
+				{
+					color = pixels[currY][x];
+					linc_r += color.R * mask[k];
+					linc_g += color.G * mask[k];
+					linc_b += color.B * mask[k];
+				}
 			}
 
 			Pixel toSave;
@@ -98,25 +105,32 @@ void ComputeGaussBlur(ThreadParameters params)
 			toSave.G = linc_g / gauss_sum;
 			toSave.B = linc_b / gauss_sum;
 
-			temp[i][j] = toSave;
+			temp[y][x] = toSave;
 		}
 	}
 
 	//For every pixel on the output bitmap ...
-	for (int i = gaussHalf; i<params.ImageHeight - gaussHalf; i++)
+	for (int y = 0; y<params.ImageHeight; y++)
 	{
-		for (int j = gaussHalf; j < params.ImageWidth - gaussHalf; j++)
+		for (int x = 0; x < params.ImageWidth; x++)
 		{
 			linc_r = 0;
 			linc_g = 0;
 			linc_b = 0;
 
+			int currX;
+
 			for (int k = 0; k<gauss_w; k++)
 			{
-				color = temp[i][j - gaussHalf + k];
-				linc_r += color.R * mask[k];
-				linc_g += color.G * mask[k];
-				linc_b += color.B * mask[k];
+				currX = x - gaussHalf + k;
+
+				if (currX >= 0 && currX < params.ImageWidth)
+				{
+					color = temp[y][currX];
+					linc_r += color.R * mask[k];
+					linc_g += color.G * mask[k];
+					linc_b += color.B * mask[k];
+				}
 			}
 
 			Pixel toSave;
@@ -124,14 +138,23 @@ void ComputeGaussBlur(ThreadParameters params)
 			toSave.G = linc_g / gauss_sum;
 			toSave.B = linc_b / gauss_sum;
 
-			pixels[i][j] = toSave;
+			pixels[y][x] = toSave;
 		}
 	}
 
 	DeletePixelsArray(temp, params.ImageHeight);
 	delete[] mask;
 
-	for (int y = gaussHalf; y < params.ImageHeight - gaussHalf; y++)
+	int beginCopy = 0;
+	int endCopy = params.ImageHeight;
+
+	if (params.IdOfImgPart != 0) 
+		beginCopy = gaussHalf;
+	if (params.IdOfImgPart != params.NumOfImgParts - 1)
+		endCopy -= gaussHalf;
+
+
+	for (int y = beginCopy; y < endCopy; y++)
 		memcpy(&params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
 
 	DeletePixelsArray(pixels, params.ImageHeight);
