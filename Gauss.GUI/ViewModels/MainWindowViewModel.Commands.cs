@@ -48,7 +48,7 @@ namespace Gauss.GUI.ViewModels
                 MainPanelImage = await ImageManager.GenerateBlurredImageAsync(new GeneratorParameters
                 {
                     NumberOfThreads = NumberOfThreads,
-                    BlurLevel = BlurLevel,
+                    BlurLevel = BlurIterations,
                     GaussMaskSize = GaussMaskSize,
                     GeneratingLibrary = GeneratingLibrary,
                 });

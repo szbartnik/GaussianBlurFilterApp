@@ -16,7 +16,8 @@ Pixel** CopyPixels(Pixel** pixels, int height, int width)
 	return toReturn;
 }
 
-int* ComputePascalRow(int n){
+int* ComputePascalRow(int n)
+{
 	int* row = new int[n + 1];
 	row[0] = 1; //First element is always 1
 	for (int i = 1; i<n / 2 + 1; i++){ //Progress up, until reaching the middle value
@@ -28,9 +29,18 @@ int* ComputePascalRow(int n){
 	return row;
 }
 
+void DeletePixelsArray(Pixel** array, int height)
+{
+	for (int y = 0; y < height; y++)
+	{
+		delete[] array[y];
+	}
+}
+
 void ComputeGaussBlur(ThreadParameters params)
 {
 	int row_padded = (params.ImageWidth * 3 + 3) & (~3);
+	int gaussHalf = params.GaussMaskSize / 2;
 
 	Pixel** pixels = new Pixel*[params.ImageHeight];
 
@@ -58,7 +68,7 @@ void ComputeGaussBlur(ThreadParameters params)
 
 	double linc_r, linc_g, linc_b;
 
-	const int gauss_w = 25; // must be odd
+	const int gauss_w = params.GaussMaskSize; // must be odd
 	int gauss_sum = 0;
 
 	int* mask = ComputePascalRow(gauss_w - 1);
@@ -67,9 +77,9 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	//For every pixel on the temporary bitmap ...
-	for (int i = gauss_w - 1; i<params.ImageHeight; i++)
+	for (int i = gaussHalf; i < params.ImageHeight - gaussHalf; i++)
 	{
-		for (int j = 0; j<params.ImageWidth; j++)
+		for (int j = gaussHalf; j<params.ImageWidth - gaussHalf; j++)
 		{
 			linc_r = 0;
 			linc_g = 0;
@@ -77,7 +87,7 @@ void ComputeGaussBlur(ThreadParameters params)
 
 			for (int k = 0; k<gauss_w; k++)
 			{
-				color = pixels[i - (gauss_w - 1) + k][j];
+				color = pixels[i - gaussHalf + k][j];
 				linc_r += color.R * mask[k];
 				linc_g += color.G * mask[k];
 				linc_b += color.B * mask[k];
@@ -93,9 +103,9 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	//For every pixel on the output bitmap ...
-	for (int i = 0; i<params.ImageHeight; i++)
+	for (int i = gaussHalf; i<params.ImageHeight - gaussHalf; i++)
 	{
-		for (int j = gauss_w - 1; j<params.ImageWidth; j++)
+		for (int j = gaussHalf; j < params.ImageWidth - gaussHalf; j++)
 		{
 			linc_r = 0;
 			linc_g = 0;
@@ -103,7 +113,7 @@ void ComputeGaussBlur(ThreadParameters params)
 
 			for (int k = 0; k<gauss_w; k++)
 			{
-				color = temp[i][j - (gauss_w - 1) + k];
+				color = temp[i][j - gaussHalf + k];
 				linc_r += color.R * mask[k];
 				linc_g += color.G * mask[k];
 				linc_b += color.B * mask[k];
@@ -118,8 +128,11 @@ void ComputeGaussBlur(ThreadParameters params)
 		}
 	}
 
+	DeletePixelsArray(temp, params.ImageHeight);
 	delete[] mask;
 
-	for (int y = 0; y < params.ImageHeight; y++)
+	for (int y = gaussHalf; y < params.ImageHeight - gaussHalf; y++)
 		memcpy(&params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
+
+	DeletePixelsArray(pixels, params.ImageHeight);
 }

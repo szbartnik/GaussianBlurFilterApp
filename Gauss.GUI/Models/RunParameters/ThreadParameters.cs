@@ -13,5 +13,10 @@ namespace Gauss.GUI.Models.RunParameters
         public int ImgHeight;
         public int IdOfImgPart;
         public int NumOfImgParts;
+
+        public override string ToString()
+        {
+            return string.Format("ThreadID: {0}; Width: {1}; Height: {2}; NumOfParts: {3}; ThreadOffset: {4}", IdOfImgPart, ImgWidth, ImgHeight, NumOfImgParts, CurrentImgOffset);
+        }
     }
 }
