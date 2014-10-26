@@ -94,17 +94,17 @@ namespace Gauss.GUI.ViewModels
         }
         private int _numberOfThreads;
 
-        public int BlurLevel
+        public int BlurIterations
         {
-            get { return _blurLevel; }
+            get { return _blurIterations; }
             set
             {
-                if (value == _blurLevel) return;
-                _blurLevel = value;
+                if (value == _blurIterations) return;
+                _blurIterations = value;
                 OnPropertyChanged();
             }
         }
-        private int _blurLevel;
+        private int _blurIterations;
 
         public GeneratingLibrary GeneratingLibrary
         {
@@ -160,9 +160,9 @@ namespace Gauss.GUI.ViewModels
         private void InitializeProperties()
         {
             NumberOfThreads = 2;
-            BlurLevel = 40;
+            BlurIterations = 5;
             GeneratingLibrary = GeneratingLibrary.CPP;
-            GaussMaskSize = 25;
+            GaussMaskSize = 13;
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
             InformationText = "Computing image...";

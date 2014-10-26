@@ -42,9 +42,9 @@
             </Border>
             <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">
                 <StackPanel>
-                    <TextBlock Text="Blur level:" FontSize="12" VerticalAlignment="Center"/>
+                    <TextBlock Text="Blur iterations:" FontSize="12" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding ElementName=BlurLevelSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
-                    <Slider x:Name="BlurLevelSlider" Minimum="1" Maximum="100" VerticalAlignment="Center" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding BlurLevel}"/>
+                    <Slider x:Name="BlurLevelSlider" Minimum="1" Maximum="100" VerticalAlignment="Center" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding BlurIterations}"/>
                 </StackPanel>
             </Border>
             <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">

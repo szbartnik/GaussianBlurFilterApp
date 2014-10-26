@@ -70,7 +70,7 @@ void ComputeGaussBlur(ThreadParameters params)
 	//For every pixel on the temporary bitmap ...
 	for (int i = gaussHalf; i < params.ImageHeight - gaussHalf; i++)
 	{
-		for (int j = 0; j<params.ImageWidth; j++)
+		for (int j = gaussHalf; j<params.ImageWidth - gaussHalf; j++)
 		{
 			linc_r = 0;
 			linc_g = 0;
@@ -94,7 +94,7 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	//For every pixel on the output bitmap ...
-	for (int i = 0; i<params.ImageHeight; i++)
+	for (int i = gaussHalf; i<params.ImageHeight - gaussHalf; i++)
 	{
 		for (int j = gaussHalf; j < params.ImageWidth - gaussHalf; j++)
 		{
@@ -121,6 +121,6 @@ void ComputeGaussBlur(ThreadParameters params)
 
 	delete[] mask;
 
-	for (int y = 0; y < params.ImageHeight; y++)
+	for (int y = gaussHalf; y < params.ImageHeight - gaussHalf; y++)
 		memcpy(&params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
 }

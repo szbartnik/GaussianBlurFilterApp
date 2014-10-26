@@ -41,21 +41,26 @@ namespace Gauss.GUI.Core
             var tasks = new Task[generatorParams.NumberOfThreads];
             var imgSizes = GetLoadedImageSizes();
 
-            for (int threadNum = 0; threadNum < tasks.Length; threadNum++)
+            while (generatorParams.BlurLevel-- > 0)
             {
-                int num = threadNum;
-                tasks[threadNum] = Task.Run(() =>
+                for (int threadNum = 0; threadNum < tasks.Length; threadNum++)
                 {
-                    var currentThreadParams = ComputeThreadParams(
-                        threadId: num, 
-                        generatorParams: generatorParams,
-                        imageSizes: imgSizes);
+                    int num = threadNum;
+                    tasks[threadNum] = Task.Run(() =>
+                    {
+                        var currentThreadParams = ComputeThreadParams(
+                            threadId: num,
+                            generatorParams: generatorParams,
+                            imageSizes: imgSizes);
 
-                    RunUnsafeImageGenerationCode(currentThreadParams, generatorParams.GeneratingLibrary);
-                });
+                        Console.WriteLine(currentThreadParams.ToString());
+
+                        RunUnsafeImageGenerationCode(currentThreadParams, generatorParams.GeneratingLibrary);
+                    });
+                }
+
+                await Task.WhenAll(tasks);
             }
-
-            await Task.WhenAll(tasks);
             return SourceFile;
         }
 
@@ -90,10 +95,8 @@ namespace Gauss.GUI.Core
                 if (i == threadId)
                     currentThreadImgHeight = numOfLinesOfCurrentThread;
                 else
-                    sumOfOffsetLines += numOfLinesOfCurrentThread;
+                    sumOfOffsetLines += (numOfLinesOfCurrentThread - (generatorParams.GaussMaskSize - 1));
             }
-
-            sumOfOffsetLines -= threadId*(generatorParams.GaussMaskSize - 1);
 
             return new ThreadParameters
             {
