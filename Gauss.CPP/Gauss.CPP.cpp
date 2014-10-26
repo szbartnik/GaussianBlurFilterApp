@@ -16,7 +16,8 @@ Pixel** CopyPixels(Pixel** pixels, int height, int width)
 	return toReturn;
 }
 
-int* ComputePascalRow(int n){
+int* ComputePascalRow(int n)
+{
 	int* row = new int[n + 1];
 	row[0] = 1; //First element is always 1
 	for (int i = 1; i<n / 2 + 1; i++){ //Progress up, until reaching the middle value
@@ -26,6 +27,14 @@ int* ComputePascalRow(int n){
 		row[i] = row[n - i];
 	}
 	return row;
+}
+
+void DeletePixelsArray(Pixel** array, int height)
+{
+	for (int y = 0; y < height; y++)
+	{
+		delete[] array[y];
+	}
 }
 
 void ComputeGaussBlur(ThreadParameters params)
@@ -119,8 +128,11 @@ void ComputeGaussBlur(ThreadParameters params)
 		}
 	}
 
+	DeletePixelsArray(temp, params.ImageHeight);
 	delete[] mask;
 
 	for (int y = gaussHalf; y < params.ImageHeight - gaussHalf; y++)
 		memcpy(&params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
+
+	DeletePixelsArray(pixels, params.ImageHeight);
 }
