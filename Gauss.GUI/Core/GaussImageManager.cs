@@ -15,7 +15,7 @@ namespace Gauss.GUI.Core
         #region DLL Imports
 
         [DllImport("Gauss.ASM.dll", EntryPoint = "ComputeGaussBlur")]
-        private static extern int ComputeGaussBlurAsm(int x, int y);
+        private static extern int ComputeGaussBlurAsm(ThreadParameters threadParameters);
 
         [DllImport("Gauss.CPP.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]
         private static extern void ComputeGaussBlurCpp(ThreadParameters threadParameters);
@@ -134,7 +134,7 @@ namespace Gauss.GUI.Core
                 switch (genLibrary)
                 {
                     case GeneratingLibrary.ASM:
-                        ComputeGaussBlurAsm(3, 4);
+                        ComputeGaussBlurAsm(currentThreadParams);
                         break;
                     case GeneratingLibrary.CPP:
                         ComputeGaussBlurCpp(currentThreadParams);

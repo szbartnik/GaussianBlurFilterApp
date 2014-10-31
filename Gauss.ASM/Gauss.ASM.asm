@@ -5,11 +5,19 @@
 .data
 .code
 
-ComputeGaussBlur proc uses ebx a:DWORD, b:DWORD
+PARAMS STRUCT
+	maskSize      DWORD  ?
+	imgOffset     DWORD  ?
+	blurLvl       DWORD  ?
+	imgWidth      DWORD  ?
+	imgHeight     DWORD  ?
+	imgPartId     DWORD  ?
+	imgPartsCount DWORD  ?
+	imgPtr        BYTE PTR  ?
+PARAMS ENDS
 
-mov eax,a
-mov ebx,b
-add eax, ebx
+ComputeGaussBlur proc uses ebx args:PARAMS
+
 ret
 
 ComputeGaussBlur endp 

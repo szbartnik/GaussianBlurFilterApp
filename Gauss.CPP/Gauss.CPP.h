@@ -9,14 +9,14 @@ typedef struct Pixel {
 
 struct ThreadParameters
 {
-	unsigned char* ImgByteArrayPtr;
-	int CurrentImgOffset;
 	int GaussMaskSize;
+	int CurrentImgOffset;
 	int BlurLevel;
 	int ImageWidth;
 	int ImageHeight;
 	int IdOfImgPart;
 	int NumOfImgParts;
+	unsigned char* ImgByteArrayPtr;
 };
 
 API void ComputeGaussBlur(ThreadParameters threadParameters);
