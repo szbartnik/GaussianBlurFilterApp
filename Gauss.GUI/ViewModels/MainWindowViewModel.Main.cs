@@ -159,9 +159,9 @@ namespace Gauss.GUI.ViewModels
 
         private void InitializeProperties()
         {
-            NumberOfThreads = 2;
-            BlurIterations = 5;
-            GeneratingLibrary = GeneratingLibrary.CPP;
+            NumberOfThreads = 1;
+            BlurIterations = 1;
+            GeneratingLibrary = GeneratingLibrary.ASM;
             GaussMaskSize = 13;
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
@@ -223,20 +223,16 @@ namespace Gauss.GUI.ViewModels
             SetDropImageZoneState(DropImagesZoneState.Idle);
         }
 
-        public void OnImageDrop(DragEventArgs dragEventArgs)
+        public void OnImageDrop(string droppedFile)
         {
             SetDropImageZoneState(DropImagesZoneState.Dropped);
 
-            var filenames = dragEventArgs.Data.GetData(DataFormats.FileDrop, true) as string[];
-            
             try
             {
-                ImageManager = new GaussImageManager(filenames);
+                ImageManager = new GaussImageManager(droppedFile);
 
-                var fileName = filenames.First();
-
-                MainPanelImage = File.ReadAllBytes(fileName);
-                _mainPanelImagePath = fileName;
+                MainPanelImage = File.ReadAllBytes(droppedFile);
+                _mainPanelImagePath = droppedFile;
 
                 ProgramState = ProgramState.ImageLoaded;
             }

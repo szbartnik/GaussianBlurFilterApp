@@ -24,11 +24,11 @@ namespace Gauss.GUI.Core
 
         private byte[] SourceFile { get; set; }
 
-        public GaussImageManager(IEnumerable<string> filenames)
+        public GaussImageManager(string filename)
         {
             try
             {
-                SourceFile = File.ReadAllBytes(filenames.First());
+                SourceFile = File.ReadAllBytes(filename);
             }
             catch (Exception e)
             {

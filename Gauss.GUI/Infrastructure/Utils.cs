@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -17,6 +18,11 @@ namespace Gauss.GUI.Infrastructure
                 return false;
 
             return true;
+        }
+
+        public static IEnumerable<string> ToFilesArray(this DragEventArgs eventArgs)
+        {
+            return eventArgs.Data.GetData(DataFormats.FileDrop, true) as string[];
         }
     }
 }

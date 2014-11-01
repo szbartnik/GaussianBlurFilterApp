@@ -16,7 +16,7 @@ PARAMS STRUCT
 	imgPtr        BYTE PTR  ?
 PARAMS ENDS
 
-ComputeGaussBlur proc uses ebx args:PARAMS
+ComputeGaussBlur proc args:PARAMS
 
 ret
 

@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Windows;
 using Gauss.GUI.Infrastructure;
 using Gauss.GUI.ViewModels;
 
@@ -9,7 +11,14 @@ namespace Gauss.GUI.Views
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel();
+            var vm = new MainWindowViewModel();
+            DataContext = vm;
+
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length == 2)
+            {
+                vm.OnImageDrop(args[1]);
+            }
         }
 
         private void UIElement_OnDragOver(object sender, DragEventArgs e)
@@ -34,7 +43,7 @@ namespace Gauss.GUI.Views
             var vm = DataContext as MainWindowViewModel;
             if (vm != null)
             {
-                vm.OnImageDrop(e);
+                vm.OnImageDrop(e.ToFilesArray().First());
             }
         }
 
