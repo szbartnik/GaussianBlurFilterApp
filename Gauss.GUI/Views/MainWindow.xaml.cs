@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using Gauss.GUI.Infrastructure;
@@ -14,11 +15,13 @@ namespace Gauss.GUI.Views
             var vm = new MainWindowViewModel();
             DataContext = vm;
 
+            // Command line arguments run
             var args = Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-            {
+            if (args.Length != 2) 
+                return;
+
+            if(File.Exists(args[1]))
                 vm.OnImageDrop(args[1]);
-            }
         }
 
         private void UIElement_OnDragOver(object sender, DragEventArgs e)
