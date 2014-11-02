@@ -1,7 +1,13 @@
 .686 
 .387
 .model flat, stdcall 
+option casemap :none
 .xmm
+
+include \masm32\include\windows.inc
+include \masm32\include\kernel32.inc
+includelib \masm32\lib\kernel32.lib
+
 .data
 
 rowPadded  dd ?
@@ -24,94 +30,103 @@ PARAMS ENDS
 ComputePascalRow proc x:DWORD
 	local counter:DWORD
 
-; Setting iterator to the initial value
-mov     counter, 1
+	; Setting iterator to the initial value
+	mov     counter, 1
 
-; Setting the first element
-mov     gaussMask, 1
+	; Setting the first element
+	mov     gaussMask, 1
 
-jmp @startOfFirstLoop
-@firstGaussIteration:
-; Checking iterate conditions
-mov     eax, counter
-inc     eax
-mov     counter, eax
-mov     eax, x
+	jmp @startOfFirstLoop
+	@firstGaussIteration:
+	; Checking iterate conditions
+	mov     eax, counter
+	inc     eax
+	mov     counter, eax
+	mov     eax, x
 
-;;;;;;;;;;;;;;;;;;
-;;; First loop ;;;
-@startOfFirstLoop:
-cdq
-sub     eax, edx
-sar     eax, 1
-cmp     counter, eax
-jg      @startOfSecondLoop
+	;;;;;;;;;;;;;;;;;;
+	;;; First loop ;;;
+	@startOfFirstLoop:
+	cdq
+	sub     eax, edx
+	sar     eax, 1
+	cmp     counter, eax
+	jg      @startOfSecondLoop
 
-; n - i + 1
-mov     eax, x
-sub     eax, counter
-inc     eax
+	; n - i + 1
+	mov     eax, x
+	sub     eax, counter
+	inc     eax
 
-; row[i - 1] * (n - i + 1)
-mov     ecx, counter
-imul    eax, gaussMask [ecx*4-4]
+	; row[i - 1] * (n - i + 1)
+	mov     ecx, counter
+	imul    eax, gaussMask [ecx*4-4]
 
-; row[i - 1] * (n - i + 1) / i
-cdq
-idiv    counter
+	; row[i - 1] * (n - i + 1) / i
+	cdq
+	idiv    counter
 
-; row[i] = row[i - 1] * (n - i + 1) / i;
-mov     gaussMask [ecx*4], eax
+	; row[i] = row[i - 1] * (n - i + 1) / i;
+	mov     gaussMask [ecx*4], eax
 
-jmp @firstGaussIteration
+	jmp @firstGaussIteration
 
-;;;;;;;;;;;;;;;;;;;
-;;; Second loop ;;;
-@secondGaussIteration:
+	;;;;;;;;;;;;;;;;;;;
+	;;; Second loop ;;;
+	@secondGaussIteration:
 
-mov     eax, counter
-inc     eax
-mov     counter, eax
+	mov     eax, counter
+	inc     eax
+	mov     counter, eax
 
-@startOfSecondLoop:
-mov     eax, x
-cmp     counter, eax
-jge     @endOfSecondGaussIteration
+	@startOfSecondLoop:
+	mov     eax, x
+	cmp     counter, eax
+	jge     @endOfSecondGaussIteration
 
-; row[i] = row[n - i];
-sub     eax, counter ; n-i
-dec     eax
-mov     ecx, gaussMask [eax*4]
-mov     eax, counter
-mov     gaussMask [eax*4], ecx
+	; row[i] = row[n - i];
+	sub     eax, counter ; n-i
+	dec     eax
+	mov     ecx, gaussMask [eax*4]
+	mov     eax, counter
+	mov     gaussMask [eax*4], ecx
 
-jmp @secondGaussIteration
+	jmp @secondGaussIteration
 
-@endOfSecondGaussIteration:
-ret
+	@endOfSecondGaussIteration:
+	ret
 
 ComputePascalRow endp
+
+Malloc proc nSize:dword
+	
+	add nSize, 4
+	invoke GlobalAlloc, GPTR, nSize
+	
+	ret
+Malloc endp
 
 ;;;;;;;;;;;;
 ;;; Main ;;;
 ComputeGaussBlur proc args:PARAMS
 
-; Compute rowPadded
-mov     eax, args.imgWidth
-imul    eax, 3
-add     eax, 3
-and     eax, 0FFFFFFFCh
-mov     rowPadded, eax
+	; Compute rowPadded
+	mov     eax, args.imgWidth
+	imul    eax, 3
+	add     eax, 3
+	and     eax, 0FFFFFFFCh
+	mov     rowPadded, eax
 
-; Compute half of gauss mask
-mov     eax, args.maskSize
-cdq
-sub     eax, edx
-sar     eax, 1
+	; Compute half of gauss mask
+	mov     eax, args.maskSize
+	cdq
+	sub     eax, edx
+	sar     eax, 1
 
-; Compute Pascal row
-invoke  ComputePascalRow, args.maskSize
-invoke  ComputePascalRow, args.maskSize
+	; Compute Pascal row
+	invoke  ComputePascalRow, args.maskSize
+
+	invoke Malloc, 2
 
 ret
 
