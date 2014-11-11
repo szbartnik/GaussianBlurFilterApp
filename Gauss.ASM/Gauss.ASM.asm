@@ -13,6 +13,7 @@ includelib \masm32\lib\kernel32.lib
 
 rowPadded  dd ?
 gaussHalf  dd ?
+gaussSum   dd ?
 gaussMask  dd 25 dup(0)
 tempImg    dd ?
 
@@ -28,6 +29,32 @@ PARAMS STRUCT
 	imgPartsCount DWORD  ?
 	imgPtr        BYTE PTR  ?
 PARAMS ENDS
+
+ComputeGaussMaskSum proc x:DWORD
+	local counter:DWORD
+
+	mov         gaussSum, 0  
+	mov         counter, 0  
+	jmp         @loopInit
+@loopBegin:
+	mov         eax, counter 
+	inc         eax
+	mov         counter, eax  
+
+@loopInit:
+	mov         eax, counter  
+	cmp         eax, x
+	jge         @loopEnd 
+	mov         eax, counter  
+	mov         edx, gaussSum 
+	add         edx, gaussMask [eax*4]  
+	mov         gaussSum, edx  
+	jmp         @loopBegin
+
+@loopEnd:
+	ret
+
+ComputeGaussMaskSum endp
 
 ; Computes specified pascal triangle row (max 24)
 ComputePascalRow proc x:DWORD
@@ -85,11 +112,10 @@ ComputePascalRow proc x:DWORD
 	@startOfSecondLoop:
 	mov     eax, x
 	cmp     counter, eax
-	jge     @endOfSecondGaussIteration
+	jg      @endOfSecondGaussIteration
 
 	; row[i] = row[n - i];
 	sub     eax, counter ; n-i
-	dec     eax
 	mov     ecx, gaussMask [eax*4]
 	mov     eax, counter
 	mov     gaussMask [eax*4], ecx
@@ -125,9 +151,16 @@ ComputeGaussBlur proc args:PARAMS
 	mov     gaussHalf, eax
 
 	; Compute Pascal row
-	invoke  ComputePascalRow, args.maskSize
+	mov     eax, args.maskSize
+	dec     eax
+	invoke  ComputePascalRow, eax
 
+	; Compute Gauss mask sum
+	invoke ComputeGaussMaskSum, args.maskSize
+
+	; Free the memory 
 	free(tempImg)
+
 	ret
 
 ComputeGaussBlur endp 
