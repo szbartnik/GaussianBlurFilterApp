@@ -49,17 +49,17 @@ void ComputeGaussBlur(ThreadParameters params)
 	for (int y = 0; y < params.ImageHeight; y++)
 	{
 		int currY = y - gaussHalf;
-		unsigned char* offset1 = imgOffset + row_padded * currY;
+		unsigned char* offset1 = imgOffset - gaussHalf * row_padded + row_padded * y;
 
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
-			linc_r = 0;
-			linc_g = 0;
 			linc_b = 0;
+			linc_g = 0;
+			linc_r = 0;
 
 			unsigned char* offset2 = offset1 + x * 3;
 
-			/*for (int k = 0; k<gauss_w; k++)
+			for (int k = 0; k<gauss_w; k++)
 			{
 				if (currY >= 0 && currY < params.ImageHeight)
 				{
@@ -73,11 +73,11 @@ void ComputeGaussBlur(ThreadParameters params)
 
 			temp[currPos++] = linc_b / gauss_sum;
 			temp[currPos++] = linc_g / gauss_sum;
-			temp[currPos++] = linc_r / gauss_sum;*/
+			temp[currPos++] = linc_r / gauss_sum;
 
-			temp[currPos++] = offset2[0];
-			temp[currPos++] = offset2[1];
-			temp[currPos++] = offset2[2];
+			/*temp[currPos++] = *(offset2 + gaussHalf * row_padded + 0);
+			temp[currPos++] = *(offset2 + gaussHalf * row_padded + 1);
+			temp[currPos++] = *(offset2 + gaussHalf * row_padded + 2);*/
 		}
 
 		currPos += row_padded_diff;
@@ -98,32 +98,32 @@ void ComputeGaussBlur(ThreadParameters params)
 	{
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
-			linc_r = 0;
-			linc_g = 0;
 			linc_b = 0;
+			linc_g = 0;
+			linc_r = 0;
 
 			int currX = x - gaussHalf;
-			unsigned char* offset2 = temp + x * 3 - gaussHalf + row_padded * y;
+			unsigned char* offset2 = temp + x * 3 + row_padded * y - gaussHalf * 3;
 
-			//for (int k = 0; k<gauss_w; k++)
-			//{
-			//	if (currX >= 0 && currX < params.ImageWidth)
-			//	{
-			//		linc_b += offset2[0] * mask[k];
-			//		linc_g += offset2[1] * mask[k];
-			//		linc_r += offset2[2] * mask[k];
-			//	}
+			for (int k = 0; k<gauss_w; k++)
+			{
+				if (currX >= 0 && currX < params.ImageWidth)
+				{
+					linc_b += offset2[0] * mask[k];
+					linc_g += offset2[1] * mask[k];
+					linc_r += offset2[2] * mask[k];
+				}
 
-			//	offset2 += 3;
-			//}
+				offset2 += 3;
+			}
 
-			//imgOffset[currPos++] = linc_b / gauss_sum;
-			//imgOffset[currPos++] = linc_g / gauss_sum;
-			//imgOffset[currPos++] = linc_r / gauss_sum;
+			imgOffset[currPos++] = linc_b / gauss_sum;
+			imgOffset[currPos++] = linc_g / gauss_sum;
+			imgOffset[currPos++] = linc_r / gauss_sum;
 
-			imgOffset[currPos++] = offset2[0];
-			imgOffset[currPos++] = offset2[1];
-			imgOffset[currPos++] = offset2[2];
+			/*imgOffset[currPos++] = *(offset2 + gaussHalf * 3 + 0);
+			imgOffset[currPos++] = *(offset2 + gaussHalf * 3 + 1);
+			imgOffset[currPos++] = *(offset2 + gaussHalf * 3 + 2);*/
 		}
 
 		currPos += row_padded_diff;
