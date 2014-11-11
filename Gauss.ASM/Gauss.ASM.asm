@@ -6,6 +6,7 @@ option casemap :none
 
 include \masm32\include\windows.inc
 include \masm32\include\kernel32.inc
+include \masm32\macros\macros.asm
 includelib \masm32\lib\kernel32.lib
 
 .data
@@ -13,6 +14,7 @@ includelib \masm32\lib\kernel32.lib
 rowPadded  dd ?
 gaussHalf  dd ?
 gaussMask  dd 25 dup(0)
+tempImg    dd ?
 
 .code
 
@@ -99,21 +101,6 @@ ComputePascalRow proc x:DWORD
 
 ComputePascalRow endp
 
-Malloc proc nSize:dword
-	
-	add nSize, 4
-	invoke GlobalAlloc, GPTR, nSize
-	ret
-
-Malloc endp
-
-GlSize proc pointer:dword
-	
-	invoke GlobalSize, pointer
-	ret
-
-GlSize endp
-
 ;;;;;;;;;;;;
 ;;; Main ;;;
 ComputeGaussBlur proc args:PARAMS
@@ -125,6 +112,11 @@ ComputeGaussBlur proc args:PARAMS
 	and     eax, 0FFFFFFFCh
 	mov     rowPadded, eax
 
+	; Allocate memory for temporary image array
+	mov     ebx, args.imgHeight
+	imul    ebx, eax
+	mov     tempImg, alloc(ebx)
+
 	; Compute half of gauss mask
 	mov     eax, args.maskSize
 	cdq
@@ -135,9 +127,8 @@ ComputeGaussBlur proc args:PARAMS
 	; Compute Pascal row
 	invoke  ComputePascalRow, args.maskSize
 
-
-
-ret
+	free(tempImg)
+	ret
 
 ComputeGaussBlur endp 
 

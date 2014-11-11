@@ -14,7 +14,7 @@ namespace Gauss.GUI.Core
     {
         #region DLL Imports
 
-        [DllImport("Gauss.ASM.dll", EntryPoint = "ComputeGaussBlur")]
+        [DllImport("Gauss.ASM.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]
         private static extern int ComputeGaussBlurAsm(ThreadParameters threadParameters);
 
         [DllImport("Gauss.CPP.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]

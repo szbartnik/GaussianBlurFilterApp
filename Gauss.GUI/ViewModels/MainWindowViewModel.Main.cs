@@ -159,9 +159,9 @@ namespace Gauss.GUI.ViewModels
 
         private void InitializeProperties()
         {
-            NumberOfThreads = 2;
+            NumberOfThreads = 1;
             BlurIterations = 1;
-            GeneratingLibrary = GeneratingLibrary.CPP;
+            GeneratingLibrary = GeneratingLibrary.ASM;
             GaussMaskSize = 13;
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
