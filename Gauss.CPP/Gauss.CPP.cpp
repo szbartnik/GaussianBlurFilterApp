@@ -1,18 +1,9 @@
 #include "stdafx.h"
 #include "Gauss.CPP.h"
 
-Pixel** CopyPixels(Pixel** pixels, int height, int width)
+unsigned char* AllocateArray(int size)
 {
-	Pixel** toReturn = new Pixel*[height];
-
-	for (int y = 0; y < height; y++)
-	{
-		toReturn[y] = new Pixel[width];
-		for (int x = 0; x < width; x++)
-		{
-			toReturn[y][x] = pixels[y][x];
-		}
-	}
+	unsigned char* toReturn = new unsigned char[size];
 	return toReturn;
 }
 
@@ -29,133 +20,114 @@ int* ComputePascalRow(int n)
 	return row;
 }
 
-void DeletePixelsArray(Pixel** array, int height)
-{
-	for (int y = 0; y < height; y++)
-	{
-		delete[] array[y];
-	}
-}
-
 void ComputeGaussBlur(ThreadParameters params)
 {
 	int row_padded = (params.ImageWidth * 3 + 3) & (~3);
+
+	// Compute difference between row_padded and real rowWidth
+	int row_padded_diff = row_padded - params.ImageWidth * 3;
+
 	int gaussHalf = params.GaussMaskSize / 2;
 
-	Pixel** pixels = new Pixel*[params.ImageHeight];
-
-	unsigned char* tmp = new unsigned char[row_padded];
-	for (int y = 0; y < params.ImageHeight; y++)
-	{
-		memcpy(tmp, &params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], sizeof(unsigned char) * row_padded);
-		pixels[y] = new Pixel[params.ImageWidth];
-
-		for (int x = 0; x < params.ImageWidth; x++)
-		{
-			Pixel pixel;
-			pixel.B = tmp[x * 3];
-			pixel.G = tmp[x * 3 + 1];
-			pixel.R = tmp[x * 3 + 2];
-
-			pixels[y][x] = pixel;
-		}
-	}
-
-	delete[] tmp;
-
-	Pixel** temp = CopyPixels(pixels, params.ImageHeight, params.ImageWidth);
-	Pixel color;
-
-	double linc_r, linc_g, linc_b;
+	unsigned char* temp = AllocateArray(row_padded * params.ImageHeight);
 
 	const int gauss_w = params.GaussMaskSize; // must be odd
-	int gauss_sum = 0;
 
 	int* mask = ComputePascalRow(gauss_w - 1);
+
+	// Compute gauss mask sum
+	int gauss_sum = 0;
 	for (int i = 0; i < gauss_w; i++){
 		gauss_sum += mask[i];
 	}
 
+	int currPos = 0;
+	double linc_r, linc_g, linc_b;
+	unsigned char* imgOffset = &params.ImgByteArrayPtr[params.CurrentImgOffset];
+
 	//For every pixel on the temporary bitmap ...
 	for (int y = 0; y < params.ImageHeight; y++)
 	{
+		int currY = y - gaussHalf;
+		unsigned char* offset1 = imgOffset + row_padded * currY;
+
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
 			linc_r = 0;
 			linc_g = 0;
 			linc_b = 0;
 
-			int currY;
+			unsigned char* offset2 = offset1 + x * 3;
 
-			for (int k = 0; k<gauss_w; k++)
+			/*for (int k = 0; k<gauss_w; k++)
 			{
-				currY = y - gaussHalf + k;
-
 				if (currY >= 0 && currY < params.ImageHeight)
 				{
-					color = pixels[currY][x];
-					linc_r += color.R * mask[k];
-					linc_g += color.G * mask[k];
-					linc_b += color.B * mask[k];
+					linc_b += offset2[0] * mask[k];
+					linc_g += offset2[1] * mask[k];
+					linc_r += offset2[2] * mask[k];
 				}
+
+				offset2 += row_padded;
 			}
 
-			Pixel toSave;
-			toSave.R = linc_r / gauss_sum;
-			toSave.G = linc_g / gauss_sum;
-			toSave.B = linc_b / gauss_sum;
+			temp[currPos++] = linc_b / gauss_sum;
+			temp[currPos++] = linc_g / gauss_sum;
+			temp[currPos++] = linc_r / gauss_sum;*/
 
-			temp[y][x] = toSave;
+			temp[currPos++] = offset2[0];
+			temp[currPos++] = offset2[1];
+			temp[currPos++] = offset2[2];
 		}
+
+		currPos += row_padded_diff;
 	}
 
-	//For every pixel on the output bitmap ...
-	for (int y = 0; y<params.ImageHeight; y++)
-	{
-		for (int x = 0; x < params.ImageWidth; x++)
-		{
-			linc_r = 0;
-			linc_g = 0;
-			linc_b = 0;
-
-			int currX;
-
-			for (int k = 0; k<gauss_w; k++)
-			{
-				currX = x - gaussHalf + k;
-
-				if (currX >= 0 && currX < params.ImageWidth)
-				{
-					color = temp[y][currX];
-					linc_r += color.R * mask[k];
-					linc_g += color.G * mask[k];
-					linc_b += color.B * mask[k];
-				}
-			}
-
-			Pixel toSave;
-			toSave.R = linc_r / gauss_sum;
-			toSave.G = linc_g / gauss_sum;
-			toSave.B = linc_b / gauss_sum;
-
-			pixels[y][x] = toSave;
-		}
-	}
-
-	DeletePixelsArray(temp, params.ImageHeight);
-	delete[] mask;
+	currPos = 0;
 
 	int beginCopy = 0;
 	int endCopy = params.ImageHeight;
 
-	if (params.IdOfImgPart != 0) 
+	if (params.IdOfImgPart != 0)
 		beginCopy = gaussHalf;
 	if (params.IdOfImgPart != params.NumOfImgParts - 1)
 		endCopy -= gaussHalf;
 
+	//For every pixel on the output bitmap ...
+	for (int y = beginCopy; y<endCopy; y++)
+	{
+		for (int x = 0; x < params.ImageWidth; x++)
+		{
+			linc_r = 0;
+			linc_g = 0;
+			linc_b = 0;
 
-	for (int y = beginCopy; y < endCopy; y++)
-		memcpy(&params.ImgByteArrayPtr[params.CurrentImgOffset + y * row_padded], pixels[y], sizeof(unsigned char) * 3 * params.ImageWidth);
+			int currX = x - gaussHalf;
+			unsigned char* offset2 = temp + x * 3 - gaussHalf + row_padded * y;
 
-	DeletePixelsArray(pixels, params.ImageHeight);
+			//for (int k = 0; k<gauss_w; k++)
+			//{
+			//	if (currX >= 0 && currX < params.ImageWidth)
+			//	{
+			//		linc_b += offset2[0] * mask[k];
+			//		linc_g += offset2[1] * mask[k];
+			//		linc_r += offset2[2] * mask[k];
+			//	}
+
+			//	offset2 += 3;
+			//}
+
+			//imgOffset[currPos++] = linc_b / gauss_sum;
+			//imgOffset[currPos++] = linc_g / gauss_sum;
+			//imgOffset[currPos++] = linc_r / gauss_sum;
+
+			imgOffset[currPos++] = offset2[0];
+			imgOffset[currPos++] = offset2[1];
+			imgOffset[currPos++] = offset2[2];
+		}
+
+		currPos += row_padded_diff;
+	}
+
+	delete[] temp;
 }

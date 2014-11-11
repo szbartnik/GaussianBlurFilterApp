@@ -11,6 +11,7 @@ includelib \masm32\lib\kernel32.lib
 .data
 
 rowPadded  dd ?
+gaussHalf  dd ?
 gaussMask  dd 25 dup(0)
 
 .code
@@ -102,9 +103,16 @@ Malloc proc nSize:dword
 	
 	add nSize, 4
 	invoke GlobalAlloc, GPTR, nSize
-	
 	ret
+
 Malloc endp
+
+GlSize proc pointer:dword
+	
+	invoke GlobalSize, pointer
+	ret
+
+GlSize endp
 
 ;;;;;;;;;;;;
 ;;; Main ;;;
@@ -122,11 +130,12 @@ ComputeGaussBlur proc args:PARAMS
 	cdq
 	sub     eax, edx
 	sar     eax, 1
+	mov     gaussHalf, eax
 
 	; Compute Pascal row
 	invoke  ComputePascalRow, args.maskSize
 
-	invoke Malloc, 2
+
 
 ret
 
