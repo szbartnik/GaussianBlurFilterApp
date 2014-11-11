@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Gauss.CPP.h"
 
-unsigned char* AllocateArray(int size)
+BYTE* AllocateArray(int size)
 {
-	unsigned char* toReturn = new unsigned char[size];
+	BYTE* toReturn = new BYTE[size];
 	return toReturn;
 }
 
@@ -29,7 +29,7 @@ void ComputeGaussBlur(ThreadParameters params)
 
 	int gaussHalf = params.GaussMaskSize / 2;
 
-	unsigned char* temp = AllocateArray(row_padded * params.ImageHeight);
+	BYTE* temp = AllocateArray(row_padded * params.ImageHeight);
 
 	const int gauss_w = params.GaussMaskSize; // must be odd
 
@@ -43,13 +43,13 @@ void ComputeGaussBlur(ThreadParameters params)
 
 	int currPos = 0;
 	double linc_r, linc_g, linc_b;
-	unsigned char* imgOffset = &params.ImgByteArrayPtr[params.CurrentImgOffset];
+	BYTE* imgOffset = &params.ImgByteArrayPtr[params.CurrentImgOffset];
 
-	//For every pixel on the temporary bitmap ...
+	// Vertical iteration
 	for (int y = 0; y < params.ImageHeight; y++)
 	{
 		int currY = y - gaussHalf;
-		unsigned char* offset1 = imgOffset - gaussHalf * row_padded + row_padded * y;
+		BYTE* offset1 = imgOffset - gaussHalf * row_padded + row_padded * y;
 
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
@@ -57,7 +57,7 @@ void ComputeGaussBlur(ThreadParameters params)
 			linc_g = 0;
 			linc_r = 0;
 
-			unsigned char* offset2 = offset1 + x * 3;
+			BYTE* offset2 = offset1 + x * 3;
 
 			for (int k = 0; k<gauss_w; k++)
 			{
@@ -74,10 +74,6 @@ void ComputeGaussBlur(ThreadParameters params)
 			temp[currPos++] = linc_b / gauss_sum;
 			temp[currPos++] = linc_g / gauss_sum;
 			temp[currPos++] = linc_r / gauss_sum;
-
-			/*temp[currPos++] = *(offset2 + gaussHalf * row_padded + 0);
-			temp[currPos++] = *(offset2 + gaussHalf * row_padded + 1);
-			temp[currPos++] = *(offset2 + gaussHalf * row_padded + 2);*/
 		}
 
 		currPos += row_padded_diff;
@@ -89,13 +85,18 @@ void ComputeGaussBlur(ThreadParameters params)
 	int endCopy = params.ImageHeight;
 
 	if (params.IdOfImgPart != 0)
+	{
 		beginCopy = gaussHalf;
+		imgOffset += row_padded * gaussHalf;
+	}
 	if (params.IdOfImgPart != params.NumOfImgParts - 1)
 		endCopy -= gaussHalf;
 
-	//For every pixel on the output bitmap ...
+	// Horizontal iteration
 	for (int y = beginCopy; y<endCopy; y++)
 	{
+		BYTE* offset1 = temp + row_padded * y - gaussHalf * 3;
+
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
 			linc_b = 0;
@@ -103,7 +104,7 @@ void ComputeGaussBlur(ThreadParameters params)
 			linc_r = 0;
 
 			int currX = x - gaussHalf;
-			unsigned char* offset2 = temp + x * 3 + row_padded * y - gaussHalf * 3;
+			BYTE* offset2 = offset1 + x * 3;
 
 			for (int k = 0; k<gauss_w; k++)
 			{
@@ -120,10 +121,6 @@ void ComputeGaussBlur(ThreadParameters params)
 			imgOffset[currPos++] = linc_b / gauss_sum;
 			imgOffset[currPos++] = linc_g / gauss_sum;
 			imgOffset[currPos++] = linc_r / gauss_sum;
-
-			/*imgOffset[currPos++] = *(offset2 + gaussHalf * 3 + 0);
-			imgOffset[currPos++] = *(offset2 + gaussHalf * 3 + 1);
-			imgOffset[currPos++] = *(offset2 + gaussHalf * 3 + 2);*/
 		}
 
 		currPos += row_padded_diff;
