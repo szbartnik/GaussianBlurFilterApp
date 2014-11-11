@@ -59,21 +59,28 @@ void ComputeGaussBlur(ThreadParameters params)
 
 			BYTE* offset2 = offset1 + x * 3;
 
-			for (int k = 0; k<gauss_w; k++)
+			if (currY >= 0 && currY < (params.ImageHeight - gauss_w + 1))
 			{
-				if (currY >= 0 && currY < params.ImageHeight)
+				for (int k = 0; k < gauss_w; k++)
 				{
 					linc_b += offset2[0] * mask[k];
 					linc_g += offset2[1] * mask[k];
 					linc_r += offset2[2] * mask[k];
+
+					offset2 += row_padded;
 				}
 
-				offset2 += row_padded;
+				temp[currPos++] = linc_b / gauss_sum;
+				temp[currPos++] = linc_g / gauss_sum;
+				temp[currPos++] = linc_r / gauss_sum;
 			}
-
-			temp[currPos++] = linc_b / gauss_sum;
-			temp[currPos++] = linc_g / gauss_sum;
-			temp[currPos++] = linc_r / gauss_sum;
+			else
+			{
+				offset2 += gaussHalf * row_padded;
+				temp[currPos++] = offset2[0];
+				temp[currPos++] = offset2[1];
+				temp[currPos++] = offset2[2];
+			}
 		}
 
 		currPos += row_padded_diff;
@@ -106,21 +113,30 @@ void ComputeGaussBlur(ThreadParameters params)
 			int currX = x - gaussHalf;
 			BYTE* offset2 = offset1 + x * 3;
 
-			for (int k = 0; k<gauss_w; k++)
+			if (currX >= 0 && currX < (params.ImageWidth - gauss_w + 1))
 			{
-				if (currX >= 0 && currX < params.ImageWidth)
+
+				for (int k = 0; k < gauss_w; k++)
 				{
+
 					linc_b += offset2[0] * mask[k];
 					linc_g += offset2[1] * mask[k];
 					linc_r += offset2[2] * mask[k];
+
+					offset2 += 3;
 				}
 
-				offset2 += 3;
+				imgOffset[currPos++] = linc_b / gauss_sum;
+				imgOffset[currPos++] = linc_g / gauss_sum;
+				imgOffset[currPos++] = linc_r / gauss_sum;
 			}
-
-			imgOffset[currPos++] = linc_b / gauss_sum;
-			imgOffset[currPos++] = linc_g / gauss_sum;
-			imgOffset[currPos++] = linc_r / gauss_sum;
+			else
+			{
+				offset2 += gaussHalf * 3;
+				imgOffset[currPos++] = offset2[0];
+				imgOffset[currPos++] = offset2[1];
+				imgOffset[currPos++] = offset2[2];
+			}
 		}
 
 		currPos += row_padded_diff;
