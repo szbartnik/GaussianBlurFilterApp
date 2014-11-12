@@ -30,20 +30,21 @@ PARAMS STRUCT
 	imgPtr        BYTE PTR  ?
 PARAMS ENDS
 
-ComputeGaussMaskSum proc x:DWORD
+ComputeGaussMaskSum proc maskSize:DWORD
 	local counter:DWORD
 
 	mov         gaussSum, 0  
 	mov         counter, 0  
 	jmp         @loopInit
-@loopBegin:
+
+	@loopBegin:
 	mov         eax, counter 
 	inc         eax
 	mov         counter, eax  
 
-@loopInit:
+	@loopInit:
 	mov         eax, counter  
-	cmp         eax, x
+	cmp         eax, maskSize
 	jge         @loopEnd 
 	mov         eax, counter  
 	mov         edx, gaussSum 
@@ -51,13 +52,13 @@ ComputeGaussMaskSum proc x:DWORD
 	mov         gaussSum, edx  
 	jmp         @loopBegin
 
-@loopEnd:
+	@loopEnd:
 	ret
 
 ComputeGaussMaskSum endp
 
 ; Computes specified pascal triangle row (max 24)
-ComputePascalRow proc x:DWORD
+ComputePascalRow proc maskSize:DWORD
 	local counter:DWORD
 
 	; Setting iterator to the initial value
@@ -72,7 +73,7 @@ ComputePascalRow proc x:DWORD
 	mov     eax, counter
 	inc     eax
 	mov     counter, eax
-	mov     eax, x
+	mov     eax, maskSize
 
 	;;;;;;;;;;;;;;;;;;
 	;;; First loop ;;;
@@ -84,7 +85,7 @@ ComputePascalRow proc x:DWORD
 	jg      @startOfSecondLoop
 
 	; n - i + 1
-	mov     eax, x
+	mov     eax, maskSize
 	sub     eax, counter
 	inc     eax
 
@@ -110,7 +111,7 @@ ComputePascalRow proc x:DWORD
 	mov     counter, eax
 
 	@startOfSecondLoop:
-	mov     eax, x
+	mov     eax, maskSize
 	cmp     counter, eax
 	jg      @endOfSecondGaussIteration
 
@@ -157,6 +158,8 @@ ComputeGaussBlur proc args:PARAMS
 
 	; Compute Gauss mask sum
 	invoke ComputeGaussMaskSum, args.maskSize
+
+	;invoke FirstIteration, 
 
 	; Free the memory 
 	free(tempImg)

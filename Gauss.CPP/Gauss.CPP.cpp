@@ -42,7 +42,6 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	int currPos = 0;
-	double linc_r, linc_g, linc_b;
 	BYTE* imgOffset = &params.ImgByteArrayPtr[params.CurrentImgOffset];
 
 	// Vertical iteration
@@ -53,9 +52,9 @@ void ComputeGaussBlur(ThreadParameters params)
 
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
-			linc_b = 0;
-			linc_g = 0;
-			linc_r = 0;
+			double linc_b = 0;
+			double linc_g = 0;
+			double linc_r = 0;
 
 			BYTE* offset2 = offset1 + x * 3;
 
@@ -106,9 +105,9 @@ void ComputeGaussBlur(ThreadParameters params)
 
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
-			linc_b = 0;
-			linc_g = 0;
-			linc_r = 0;
+			double linc_b = 0;
+			double linc_g = 0;
+			double linc_r = 0;
 
 			int currX = x - gaussHalf;
 			BYTE* offset2 = offset1 + x * 3;
