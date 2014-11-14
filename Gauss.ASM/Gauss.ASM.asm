@@ -27,11 +27,12 @@ PARAMS STRUCT
 	imgHeight     DWORD  ?
 	imgPartId     DWORD  ?
 	imgPartsCount DWORD  ?
-	imgPtr        BYTE PTR  ?
+	imgPtr        DWORD  ?
 PARAMS ENDS
 
 ComputeGaussMaskSum proc maskSize:DWORD
-	local counter:DWORD
+
+	LOCAL counter:DWORD
 
 	mov         gaussSum, 0  
 	mov         counter, 0  
@@ -57,9 +58,86 @@ ComputeGaussMaskSum proc maskSize:DWORD
 
 ComputeGaussMaskSum endp
 
+FirstIteration proc args:PARAMS
+	
+	LOCAL imgOffset    : DWORD
+	LOCAL offset1      : DWORD
+	LOCAL offset2      : DWORD
+
+	LOCAL currPosition : DWORD
+	LOCAL currY        : DWORD
+	LOCAL x            : DWORD
+	LOCAL y            : DWORD
+	LOCAL k            : DWORD
+
+	; Compute imgOffset
+	mov     eax, args.imgPtr
+	add     ebx, args.imgOffset
+	imul    ebx, 4
+	add     eax, ebx
+	mov     imgOffset, eax
+
+	@yLoopInitialization:
+		mov     eax, 0
+		mov     y, eax
+
+	@yLoopStart:
+		; Check y iterate conditions
+		cmp     eax, args.imgHeight
+		jge     @yLoopEnd
+
+		; ########## Actions of y loop begins ##########
+		sub     eax, gaussHalf
+		mov     currY, eax
+		
+		imul    eax, rowPadded
+		add     eax, imgOffset
+		mov     offset1, eax
+
+		@xLoopInitialization:
+			mov     eax, 0
+			mov     x, eax
+
+		@xLoopStart:
+			; Check x iterate conditions
+			cmp     eax, args.imgWidth
+			jge     @xLoopEnd
+
+			; ########## Actions of x loop begins ##########
+			
+			
+			
+			; ########## Actions of x loop ends #########
+			; Increment x counter
+			mov     eax, x
+			inc     eax
+			mov     x, eax
+			jmp     @xLoopStart
+
+		@xLoopEnd:
+			
+		; ########## Actions of y loop ends ##########
+		; Increment y counter
+		mov     eax, y
+		inc     eax
+		mov     y, eax
+		jmp     @yLoopStart
+
+	@yLoopEnd:
+		ret
+
+FirstIteration endp
+
+SecondIteration proc args:PARAMS
+
+	ret
+
+SecondIteration endp
+
 ; Computes specified pascal triangle row (max 24)
 ComputePascalRow proc maskSize:DWORD
-	local counter:DWORD
+
+	LOCAL counter:DWORD
 
 	; Setting iterator to the initial value
 	mov     counter, 1
@@ -69,62 +147,62 @@ ComputePascalRow proc maskSize:DWORD
 
 	jmp @startOfFirstLoop
 	@firstGaussIteration:
-	; Checking iterate conditions
-	mov     eax, counter
-	inc     eax
-	mov     counter, eax
-	mov     eax, maskSize
+		; Checking iterate conditions
+		mov     eax, counter
+		inc     eax
+		mov     counter, eax
+		mov     eax, maskSize
 
-	;;;;;;;;;;;;;;;;;;
-	;;; First loop ;;;
+		;;;;;;;;;;;;;;;;;;
+		;;; First loop ;;;
 	@startOfFirstLoop:
-	cdq
-	sub     eax, edx
-	sar     eax, 1
-	cmp     counter, eax
-	jg      @startOfSecondLoop
+		cdq
+		sub     eax, edx
+		sar     eax, 1
+		cmp     counter, eax
+		jg      @startOfSecondLoop
 
-	; n - i + 1
-	mov     eax, maskSize
-	sub     eax, counter
-	inc     eax
+		; n - i + 1
+		mov     eax, maskSize
+		sub     eax, counter
+		inc     eax
 
-	; row[i - 1] * (n - i + 1)
-	mov     ecx, counter
-	imul    eax, gaussMask [ecx*4-4]
+		; row[i - 1] * (n - i + 1)
+		mov     ecx, counter
+		imul    eax, gaussMask [ecx*4-4]
 
-	; row[i - 1] * (n - i + 1) / i
-	cdq
-	idiv    counter
+		; row[i - 1] * (n - i + 1) / i
+		cdq
+		idiv    counter
 
-	; row[i] = row[i - 1] * (n - i + 1) / i;
-	mov     gaussMask [ecx*4], eax
+		; row[i] = row[i - 1] * (n - i + 1) / i;
+		mov     gaussMask [ecx*4], eax
 
-	jmp @firstGaussIteration
+		jmp @firstGaussIteration
 
 	;;;;;;;;;;;;;;;;;;;
 	;;; Second loop ;;;
 	@secondGaussIteration:
 
-	mov     eax, counter
-	inc     eax
-	mov     counter, eax
+		mov     eax, counter
+		inc     eax
+		mov     counter, eax
 
 	@startOfSecondLoop:
-	mov     eax, maskSize
-	cmp     counter, eax
-	jg      @endOfSecondGaussIteration
+		mov     eax, maskSize
+		cmp     counter, eax
+		jg      @endOfSecondGaussIteration
 
-	; row[i] = row[n - i];
-	sub     eax, counter ; n-i
-	mov     ecx, gaussMask [eax*4]
-	mov     eax, counter
-	mov     gaussMask [eax*4], ecx
+		; row[i] = row[n - i];
+		sub     eax, counter ; n-i
+		mov     ecx, gaussMask [eax*4]
+		mov     eax, counter
+		mov     gaussMask [eax*4], ecx
 
-	jmp @secondGaussIteration
+		jmp @secondGaussIteration
 
 	@endOfSecondGaussIteration:
-	ret
+		ret
 
 ComputePascalRow endp
 
@@ -159,7 +237,8 @@ ComputeGaussBlur proc args:PARAMS
 	; Compute Gauss mask sum
 	invoke ComputeGaussMaskSum, args.maskSize
 
-	;invoke FirstIteration, 
+	invoke FirstIteration, args
+	invoke SecondIteration, args
 
 	; Free the memory 
 	free(tempImg)

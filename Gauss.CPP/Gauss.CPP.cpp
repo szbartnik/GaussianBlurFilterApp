@@ -48,7 +48,7 @@ void ComputeGaussBlur(ThreadParameters params)
 	for (int y = 0; y < params.ImageHeight; y++)
 	{
 		int currY = y - gaussHalf;
-		BYTE* offset1 = imgOffset - gaussHalf * row_padded + row_padded * y;
+		BYTE* offset1 = imgOffset + row_padded * currY;
 
 		for (int x = 0; x < params.ImageWidth; x++)
 		{
