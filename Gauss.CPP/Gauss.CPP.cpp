@@ -42,6 +42,7 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	int currPos = 0;
+	int maxY = params.ImageHeight - gauss_w + 1;
 	BYTE* imgOffset = &params.ImgByteArrayPtr[params.CurrentImgOffset];
 
 	// Vertical iteration
@@ -50,16 +51,16 @@ void ComputeGaussBlur(ThreadParameters params)
 		int currY = y - gaussHalf;
 		BYTE* offset1 = imgOffset + row_padded * currY;
 
-		for (int x = 0; x < params.ImageWidth; x++)
+		if (currY >= 0 && currY < maxY)
 		{
-			double linc_b = 0;
-			double linc_g = 0;
-			double linc_r = 0;
-
-			BYTE* offset2 = offset1 + x * 3;
-
-			if (currY >= 0 && currY < (params.ImageHeight - gauss_w + 1))
+			for (int x = 0; x < params.ImageWidth; x++)
 			{
+				double linc_b = 0;
+				double linc_g = 0;
+				double linc_r = 0;
+
+				BYTE* offset2 = offset1 + x * 3;
+
 				for (int k = 0; k < gauss_w; k++)
 				{
 					linc_b += offset2[0] * mask[k];
@@ -68,17 +69,27 @@ void ComputeGaussBlur(ThreadParameters params)
 
 					offset2 += row_padded;
 				}
-
+				
 				temp[currPos++] = linc_b / gauss_sum;
 				temp[currPos++] = linc_g / gauss_sum;
 				temp[currPos++] = linc_r / gauss_sum;
 			}
-			else
+		}
+		else
+		{
+			BYTE* offset2 = offset1 + gaussHalf * row_padded;
+
+			for (int x = 0; x < params.ImageWidth; x++)
 			{
-				offset2 += gaussHalf * row_padded;
+				double linc_b = 0;
+				double linc_g = 0;
+				double linc_r = 0;
+
 				temp[currPos++] = offset2[0];
 				temp[currPos++] = offset2[1];
 				temp[currPos++] = offset2[2];
+
+				offset2 += 3;
 			}
 		}
 
@@ -86,6 +97,7 @@ void ComputeGaussBlur(ThreadParameters params)
 	}
 
 	currPos = 0;
+	int maxX = params.ImageWidth - gauss_w + 1;
 
 	int beginCopy = 0;
 	int endCopy = params.ImageHeight;
@@ -112,7 +124,7 @@ void ComputeGaussBlur(ThreadParameters params)
 			int currX = x - gaussHalf;
 			BYTE* offset2 = offset1 + x * 3;
 
-			if (currX >= 0 && currX < (params.ImageWidth - gauss_w + 1))
+			if (currX >= 0 && currX < maxX)
 			{
 
 				for (int k = 0; k < gauss_w; k++)
