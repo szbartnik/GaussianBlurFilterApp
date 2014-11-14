@@ -81,10 +81,6 @@ void ComputeGaussBlur(ThreadParameters params)
 
 			for (int x = 0; x < params.ImageWidth; x++)
 			{
-				double linc_b = 0;
-				double linc_g = 0;
-				double linc_r = 0;
-
 				temp[currPos++] = offset2[0];
 				temp[currPos++] = offset2[1];
 				temp[currPos++] = offset2[2];
