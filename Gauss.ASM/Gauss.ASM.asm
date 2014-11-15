@@ -34,8 +34,9 @@ ComputeGaussMaskSum proc maskSize:DWORD
 
 	LOCAL counter:DWORD
 
-	mov         gaussSum, 0  
-	mov         counter, 0  
+	xor         eax, eax
+	mov         gaussSum, eax  
+	mov         counter, eax  
 	jmp         @loopInit
 
 	@loopBegin:
@@ -65,21 +66,26 @@ FirstIteration proc args:PARAMS
 	LOCAL offset2      : DWORD
 
 	LOCAL currPosition : DWORD
+	LOCAL maxY         : DWORD
 	LOCAL currY        : DWORD
 	LOCAL x            : DWORD
 	LOCAL y            : DWORD
 	LOCAL k            : DWORD
-
+	
+	; Compute maxY
+	mov     eax, args.imgHeight
+	sub     eax, args.maskSize
+	inc     eax
+	mov     maxY, eax
+	
 	; Compute imgOffset
 	mov     eax, args.imgPtr
-	add     ebx, args.imgOffset
-	imul    ebx, 4
-	add     eax, ebx
+	add     eax, args.imgOffset
 	mov     imgOffset, eax
 
-	@yLoopInitialization:
-		mov     eax, 0
-		mov     y, eax
+	xor     eax, eax
+	mov     currPosition, eax ; Initialize currPosition
+	mov     y, eax            ; Initialize y loop iterator variable
 
 	@yLoopStart:
 		; Check y iterate conditions
@@ -87,35 +93,72 @@ FirstIteration proc args:PARAMS
 		jge     @yLoopEnd
 
 		; ########## Actions of y loop begins ##########
+		; Compute currY
 		sub     eax, gaussHalf
 		mov     currY, eax
 		
+		; Compute offset1
 		imul    eax, rowPadded
 		add     eax, imgOffset
 		mov     offset1, eax
 
-		@xLoopInitialization:
-			mov     eax, 0
-			mov     x, eax
+		mov     eax, currY
 
-		@xLoopStart:
-			; Check x iterate conditions
-			cmp     eax, args.imgWidth
-			jge     @xLoopEnd
+		.if eax >= 0 && eax < maxY
+			@x1LoopInitialization:
+				xor     eax, eax
+				mov     x, eax
 
-			; ########## Actions of x loop begins ##########
-			
-			
-			
-			; ########## Actions of x loop ends #########
-			; Increment x counter
-			mov     eax, x
-			inc     eax
-			mov     x, eax
-			jmp     @xLoopStart
+			@x1LoopStart:
+				; Check x iterate conditions
+				cmp     eax, args.imgWidth
+				jge     @x1LoopEnd
 
-		@xLoopEnd:
+				; ########## Actions of x loop begins ##########
 			
+				; Compute offset2
+				imul    eax, 3
+				add     eax, offset1
+				mov     offset2, eax
+			
+				; ########## Actions of x loop ends #########
+				; Increment x counter
+				mov     eax, x
+				inc     eax
+				mov     x, eax
+				jmp     @x1LoopStart
+
+			@x1LoopEnd:
+		.else
+			@x2LoopInitialization:
+				; Compute offset2
+				mov     eax, gaussHalf
+				imul    eax, rowPadded
+				add     eax, offset1
+				mov     offset2, eax
+				
+				xor     eax, eax
+				mov     x, eax
+
+			@x2LoopStart:
+				; Check x iterate conditions
+				cmp     eax, args.imgWidth
+				jge     @x2LoopEnd
+
+				; ########## Actions of x loop begins ##########
+				
+				
+				
+				; ########## Actions of x loop ends #########
+				; Increment x counter
+				mov     eax, x
+				inc     eax
+				mov     x, eax
+				jmp     @x2LoopStart
+
+			@x2LoopEnd:
+		.endif
+	
 		; ########## Actions of y loop ends ##########
 		; Increment y counter
 		mov     eax, y

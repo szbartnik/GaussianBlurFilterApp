@@ -55,11 +55,11 @@ void ComputeGaussBlur(ThreadParameters params)
 		{
 			for (int x = 0; x < params.ImageWidth; x++)
 			{
+				BYTE* offset2 = offset1 + x * 3;
+
 				double linc_b = 0;
 				double linc_g = 0;
 				double linc_r = 0;
-
-				BYTE* offset2 = offset1 + x * 3;
 
 				for (int k = 0; k < gauss_w; k++)
 				{
