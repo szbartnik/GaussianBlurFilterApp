@@ -17,6 +17,9 @@ gaussSum   dd ?
 gaussMask  dd 25 dup(0)
 tempImg    dd ?
 
+two       dq 2
+three     dq 3
+
 .code
 
 PARAMS STRUCT
@@ -120,7 +123,15 @@ FirstIteration proc args:PARAMS
 				imul    eax, 3
 				add     eax, offset1
 				mov     offset2, eax
-			
+
+				; Zero xmm registers
+				movsd xmm0, [three]
+				movsd xmm1, [two]
+
+				subsd xmm0, xmm1
+
+				movsd three, xmm0
+				
 				; ########## Actions of x loop ends #########
 				; Increment x counter
 				mov     eax, x
@@ -146,8 +157,6 @@ FirstIteration proc args:PARAMS
 				jge     @x2LoopEnd
 
 				; ########## Actions of x loop begins ##########
-				
-				
 				
 				; ########## Actions of x loop ends #########
 				; Increment x counter
