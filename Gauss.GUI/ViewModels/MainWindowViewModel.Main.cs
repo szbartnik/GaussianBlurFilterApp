@@ -164,7 +164,7 @@ namespace Gauss.GUI.ViewModels
             NumberOfThreads = 1;
             BlurIterations = 1;
             GeneratingLibrary = GeneratingLibrary.ASM;
-            GaussMaskSize = 13;
+            GaussMaskSize = 3;
 
             SetDropImageZoneState(DropImagesZoneState.Idle);
             InformationText = "Computing image...";

@@ -74,7 +74,7 @@ FirstIteration proc args:PARAMS
 	LOCAL k            : DWORD
 	
 	; Mask load
-	mov     ecx, gaussMask
+	lea     ecx, gaussMask
 
 	; Compute maxY
 	mov     eax, args.imgHeight
@@ -127,7 +127,7 @@ FirstIteration proc args:PARAMS
 				mov     ebx, eax ; ebx stores offset2
 
 				; Zero results register
-				movaps  XMM3, XMM0
+				psubd   XMM3, XMM3
 
 				@kLoopInitialization:
 					xor     eax, eax
@@ -145,7 +145,7 @@ FirstIteration proc args:PARAMS
 					punpcklbw XMM1, XMM0
 
 					; Mask init part
-					movd      XMM2, dword ptr [ecx][ebx]
+					movd      XMM2, dword ptr [ecx][eax]
 					shufps    XMM2, XMM2, 0h
 
 					pmullw    XMM1, XMM2 ; Multiply
@@ -165,22 +165,25 @@ FirstIteration proc args:PARAMS
 				mov     ebx, tempImg ; ebx now stores tempImg ptr
 
 				; save b pixel
-				pextrw  eax, XMM2, 0
+				pextrw  eax, XMM3, 0
 				cwd
+				cdq
 				idiv    gaussSum
 				mov     byte ptr [ebx][edi], al
 				inc     edi
 
 				; save g pixel
-				pextrw  eax, XMM2, 1
+				pextrw  eax, XMM3, 1
 				cwd
+				cdq
 				idiv    gaussSum
 				mov     byte ptr [ebx][edi], al
 				inc     edi
 
 				; save r pixel
-				pextrw  eax, XMM2, 2
+				pextrw  eax, XMM3, 2
 				cwd
+				cdq
 				idiv    gaussSum
 				mov     byte ptr [ebx][edi], al
 				inc     edi
