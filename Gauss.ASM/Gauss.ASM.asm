@@ -11,14 +11,12 @@ includelib \masm32\lib\kernel32.lib
 
 .data
 
-rowPadded  dd ?
-gaussHalf  dd ?
-gaussSum   dd ?
-gaussMask  dd 25 dup(0)
-tempImg    dd ?
-
-two       dq 2
-three     dq 3
+rowPadded      dd ?
+rowPaddedDiff  dd ?
+gaussHalf      dd ?
+gaussSum       dd ?
+gaussMask      dd 25 dup(0)
+tempImg        dd ?
 
 .code
 
@@ -75,6 +73,9 @@ FirstIteration proc args:PARAMS
 	LOCAL y            : DWORD
 	LOCAL k            : DWORD
 	
+	; Mask load
+	mov     ecx, gaussMask
+
 	; Compute maxY
 	mov     eax, args.imgHeight
 	sub     eax, args.maskSize
@@ -88,6 +89,7 @@ FirstIteration proc args:PARAMS
 
 	xor     eax, eax
 	mov     currPosition, eax ; Initialize currPosition
+	mov     edi, eax          ; edi stores currPosition
 	mov     y, eax            ; Initialize y loop iterator variable
 
 	@yLoopStart:
@@ -122,16 +124,68 @@ FirstIteration proc args:PARAMS
 				; Compute offset2
 				imul    eax, 3
 				add     eax, offset1
-				mov     offset2, eax
+				mov     ebx, eax ; ebx stores offset2
 
-				; Zero xmm registers
-				movsd xmm0, [three]
-				movsd xmm1, [two]
+				; Zero results register
+				movaps  XMM3, XMM0
 
-				subsd xmm0, xmm1
+				@kLoopInitialization:
+					xor     eax, eax
+					mov     k, eax
 
-				movsd three, xmm0
+				@kLoopStart:
+					; Check k iterate conditions
+					cmp     eax, args.maskSize
+					jge     @kLoopEnd
+
+					; ########## Actions of k loop begins ##########
+
+					; Offsets init part
+					movd      XMM1, dword ptr [ebx]
+					punpcklbw XMM1, XMM0
+
+					; Mask init part
+					movd      XMM2, dword ptr [ecx][ebx]
+					shufps    XMM2, XMM2, 0h
+
+					pmullw    XMM1, XMM2 ; Multiply
+					paddw     XMM3, XMM1 ; linc +=
+
+					add     ebx, rowPadded
 				
+					; ########## Actions of k loop ends #########
+					; Increment k counter
+					mov     eax, k
+					inc     eax
+					mov     k, eax
+					jmp     @kLoopStart	
+
+				@kLoopEnd:
+
+				mov     ebx, tempImg ; ebx now stores tempImg ptr
+
+				; save b pixel
+				pextrw  eax, XMM2, 0
+				cwd
+				idiv    gaussSum
+				mov     byte ptr [ebx][edi], al
+				inc     edi
+
+				; save g pixel
+				pextrw  eax, XMM2, 1
+				cwd
+				idiv    gaussSum
+				mov     byte ptr [ebx][edi], al
+				inc     edi
+
+				; save r pixel
+				pextrw  eax, XMM2, 2
+				cwd
+				idiv    gaussSum
+				mov     byte ptr [ebx][edi], al
+				inc     edi
+
+
 				; ########## Actions of x loop ends #########
 				; Increment x counter
 				mov     eax, x
@@ -146,7 +200,7 @@ FirstIteration proc args:PARAMS
 				mov     eax, gaussHalf
 				imul    eax, rowPadded
 				add     eax, offset1
-				mov     offset2, eax
+				mov     ebx, eax ; ebx stores offset2
 				
 				xor     eax, eax
 				mov     x, eax
@@ -157,7 +211,26 @@ FirstIteration proc args:PARAMS
 				jge     @x2LoopEnd
 
 				; ########## Actions of x loop begins ##########
-				
+
+				mov     edx, tempImg
+
+				; save b pixel
+				mov     al, byte ptr [ebx]
+				mov     byte ptr [edx][edi], al
+				inc     edi
+
+				; save g pixel
+				mov     al, byte ptr [ebx][1]
+				mov     byte ptr [edx][edi], al
+				inc     edi
+
+				; save r pixel
+				mov     al, byte ptr [ebx][2]
+				mov     byte ptr [edx][edi], al
+				inc     edi
+
+				add     ebx, 3
+
 				; ########## Actions of x loop ends #########
 				; Increment x counter
 				mov     eax, x
@@ -167,6 +240,8 @@ FirstIteration proc args:PARAMS
 
 			@x2LoopEnd:
 		.endif
+
+		add     edi, rowPaddedDiff
 	
 		; ########## Actions of y loop ends ##########
 		; Increment y counter
@@ -273,6 +348,13 @@ ComputeGaussBlur proc args:PARAMS
 	mov     ebx, args.imgHeight
 	imul    ebx, eax
 	mov     tempImg, alloc(ebx)
+
+	; Compute rowPaddedDiff
+	mov     eax, rowPadded
+	mov     ebx, args.imgWidth
+	imul    ebx, 3
+	sub     eax, ebx
+	mov     rowPaddedDiff, eax
 
 	; Compute half of gauss mask
 	mov     eax, args.maskSize
