@@ -18,6 +18,9 @@ gaussSum       dd ?
 gaussMask      dd 25 dup(0)
 tempImg        dd ?
 
+align 16
+testXMM        db 16 DUP(255)
+
 .code
 
 PARAMS STRUCT
@@ -143,12 +146,15 @@ FirstIteration proc args:PARAMS
 					; Offsets init part
 					movd      XMM1, dword ptr [ebx]
 					punpcklbw XMM1, XMM0
+					punpcklwd XMM1, XMM0
 
 					; Mask init part
-					movd      XMM2, dword ptr [ecx][eax]
+					mov       eax, k ; redundant
+					movd      XMM2, dword ptr [ecx][eax*4]
 					shufps    XMM2, XMM2, 0h
 
 					pmullw    XMM1, XMM2 ; Multiply
+
 					paddw     XMM3, XMM1 ; linc +=
 
 					add     ebx, rowPadded
@@ -173,7 +179,7 @@ FirstIteration proc args:PARAMS
 				inc     edi
 
 				; save g pixel
-				pextrw  eax, XMM3, 1
+				pextrw  eax, XMM3, 2
 				cwd
 				cdq
 				idiv    gaussSum
@@ -181,7 +187,7 @@ FirstIteration proc args:PARAMS
 				inc     edi
 
 				; save r pixel
-				pextrw  eax, XMM3, 2
+				pextrw  eax, XMM3, 4
 				cwd
 				cdq
 				idiv    gaussSum
