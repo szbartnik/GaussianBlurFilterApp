@@ -149,8 +149,7 @@ FirstIteration proc args:PARAMS
 					punpcklwd XMM1, XMM0
 
 					; Mask init part
-					mov       eax, k ; redundant
-					movd      XMM2, dword ptr [ecx][eax*4]
+					movd      XMM2, dword ptr [ecx][eax*4] ; k in eax
 					shufps    XMM2, XMM2, 0h
 
 					pmullw    XMM1, XMM2 ; Multiply
