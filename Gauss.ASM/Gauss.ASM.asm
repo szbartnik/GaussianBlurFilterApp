@@ -67,9 +67,7 @@ FirstIteration proc args:PARAMS
 	
 	LOCAL imgOffset    : DWORD
 	LOCAL offset1      : DWORD
-	LOCAL offset2      : DWORD
 
-	LOCAL currPosition : DWORD
 	LOCAL maxY         : DWORD
 	LOCAL currY        : DWORD
 	LOCAL x            : DWORD
@@ -91,7 +89,6 @@ FirstIteration proc args:PARAMS
 	mov     imgOffset, eax
 
 	xor     eax, eax
-	mov     currPosition, eax ; Initialize currPosition
 	mov     edi, eax          ; edi stores currPosition
 	mov     y, eax            ; Initialize y loop iterator variable
 
@@ -264,6 +261,20 @@ FirstIteration proc args:PARAMS
 FirstIteration endp
 
 SecondIteration proc args:PARAMS
+	
+	LOCAL imgOffset    : DWORD
+	LOCAL offset1
+
+	LOCAL maxX         : DWORD
+	LOCAL currX        : DWORD
+	LOCAL x            : DWORD
+	LOCAL y            : DWORD
+	LOCAL k            : DWORD
+
+	xor     eax, eax
+	mov     edi, eax          ; edi stores currPosition
+
+
 
 	ret
 
