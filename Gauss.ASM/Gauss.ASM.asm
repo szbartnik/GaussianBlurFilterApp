@@ -65,7 +65,6 @@ ComputeGaussMaskSum endp
 
 FirstIteration proc args:PARAMS
 	
-	LOCAL imgOffset    : DWORD
 	LOCAL offset1      : DWORD
 
 	LOCAL maxY         : DWORD
@@ -75,7 +74,7 @@ FirstIteration proc args:PARAMS
 	LOCAL k            : DWORD
 	
 	; Mask load
-	lea     ecx, gaussMask
+	lea     ecx, gaussMask ; ecx stores mask pointer
 
 	; Compute maxY
 	mov     eax, args.imgHeight
@@ -84,9 +83,8 @@ FirstIteration proc args:PARAMS
 	mov     maxY, eax
 	
 	; Compute imgOffset
-	mov     eax, args.imgPtr
-	add     eax, args.imgOffset
-	mov     imgOffset, eax
+	mov     ebx, args.imgPtr
+	add     ebx, args.imgOffset
 
 	xor     eax, eax
 	mov     edi, eax          ; edi stores currPosition
@@ -104,7 +102,7 @@ FirstIteration proc args:PARAMS
 		
 		; Compute offset1
 		imul    eax, rowPadded
-		add     eax, imgOffset
+		add     eax, ebx  ; ebx stores imgOffset
 		mov     offset1, eax
 
 		mov     eax, currY
@@ -261,9 +259,10 @@ FirstIteration proc args:PARAMS
 FirstIteration endp
 
 SecondIteration proc args:PARAMS
-	
+
+	LOCAL beginCopy    : DWORD
+	LOCAL endCopy      : DWORD
 	LOCAL imgOffset    : DWORD
-	LOCAL offset1
 
 	LOCAL maxX         : DWORD
 	LOCAL currX        : DWORD
@@ -271,8 +270,53 @@ SecondIteration proc args:PARAMS
 	LOCAL y            : DWORD
 	LOCAL k            : DWORD
 
+	; Compute imgOffset
+	mov     ebx, args.imgPtr
+	add     ebx, args.imgOffset
+	mov     imgOffset, ebx
+
+	; Compute maxX
+	mov     eax, args.imgWidth
+	sub     eax, args.maskSize
+	inc     eax
+	mov     maxX, eax
+
 	xor     eax, eax
+	mov     beginCopy, eax    ; init beginCopy
 	mov     edi, eax          ; edi stores currPosition
+
+	mov     ecx, args.imgHeight   ; ecx stores endCopy
+	mov     endCopy, ecx          ; init endCopy
+
+	.if args.imgPartId != 0
+		
+		; beginCopy = gaussHalf
+		mov    eax, gaussHalf
+		mov    beginCopy, eax
+
+		; imgOffset += rowPadded * gaussHalf
+		imul   eax, rowPadded
+		add    ebx, eax    ; ebx stores imgOffset
+		mov    imgOffset, ebx
+
+	.endif
+
+	mov     eax, args.imgPartsCount
+	dec     eax
+
+	.if args.imgPartId != eax
+		
+		sub ecx, gaussHalf
+		mov endCopy, ecx
+
+	.endif
+
+	; Mask load
+	lea     ecx, gaussMask  ; ecx stores mask pointer
+
+
+
+
 
 
 
