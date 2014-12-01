@@ -84,7 +84,7 @@ FirstIteration proc args:PARAMS
 	
 	; Compute imgOffset
 	mov     ebx, args.imgPtr
-	add     ebx, args.imgOffset
+	add     ebx, args.imgOffset ; ebx stores imgOffset
 
 	xor     eax, eax
 	mov     edi, eax          ; edi stores currPosition
@@ -262,10 +262,11 @@ SecondIteration proc args:PARAMS
 
 	LOCAL beginCopy    : DWORD
 	LOCAL endCopy      : DWORD
+
 	LOCAL imgOffset    : DWORD
+	LOCAL offset1      : DWORD
 
 	LOCAL maxX         : DWORD
-	LOCAL currX        : DWORD
 	LOCAL x            : DWORD
 	LOCAL y            : DWORD
 	LOCAL k            : DWORD
@@ -315,12 +316,158 @@ SecondIteration proc args:PARAMS
 	lea     ecx, gaussMask  ; ecx stores mask pointer
 
 
+	@yLoopInitialization:
+		mov     eax, beginCopy
+		mov     y, eax
+	@yLoopStart:
+		; Check y iterate conditions
+		cmp     eax, endCopy
+		jge     @yLoopEnd
 
+		; ########## Actions of y loop begins ##########
 
+		; Compute offset1
+		imul    eax, rowPadded ; eax = y * rowPadded
+		add     eax, tempImg   ; eax = tempImg + y * rowPadded
+		mov     ebx, gaussHalf ; ebx = gaussHalf
+		imul    ebx, 3         ; ebx = gaussHalf * 3
+		sub     eax, ebx       ; eax -= ebx
+		mov     offset1, eax   ; offset1 = tempImg + rowPadded * y - gaussHalf * 3;
 
+		@x1LoopInitialization:
+				xor     eax, eax
+				mov     x, eax
 
+		@x1LoopStart:
+				; Check x iterate conditions
+				cmp     eax, args.imgWidth
+				jge     @x1LoopEnd
 
-	ret
+				; ########## Actions of x loop begins ##########
+
+				; Compute currX
+				mov     esi, eax
+				sub     esi, gaussHalf ; esi stores currX
+
+				; Compute offset2
+				imul    eax, 3
+				add     eax, offset1
+				mov     ebx, eax ; ebx stores offset2
+
+				; Zero results register
+				psubd   XMM3, XMM3
+
+				.if esi >= 0 && esi < maxX
+					
+					@kLoopInitialization:
+						xor     eax, eax
+						mov     k, eax
+
+					@kLoopStart:
+						; Check k iterate conditions
+						cmp     eax, args.maskSize
+						jge     @kLoopEnd
+
+						; ########## Actions of k loop begins ##########
+
+						; Offsets init part
+						movd      XMM1, dword ptr [ebx]
+						punpcklbw XMM1, XMM0
+						punpcklwd XMM1, XMM0
+
+						; Mask init part
+						movd      XMM2, dword ptr [ecx][eax*4] ; k in eax
+						shufps    XMM2, XMM2, 0h
+
+						pmullw    XMM1, XMM2 ; Multiply
+
+						paddw     XMM3, XMM1 ; linc +=
+
+						add     ebx, 3
+				
+						; ########## Actions of k loop ends #########
+						; Increment k counter
+						mov     eax, k
+						inc     eax
+						mov     k, eax
+						jmp     @kLoopStart	
+
+					@kLoopEnd:
+
+					mov     esi, imgOffset ; esi now stores imgOffset
+
+					; save b pixel
+					pextrw  eax, XMM3, 0
+					cwd
+					cdq
+					idiv    gaussSum
+					mov     byte ptr [esi][edi], al
+					inc     edi
+
+					; save g pixel
+					pextrw  eax, XMM3, 2
+					cwd
+					cdq
+					idiv    gaussSum
+					mov     byte ptr [esi][edi], al
+					inc     edi
+
+					; save r pixel
+					pextrw  eax, XMM3, 4
+					cwd
+					cdq
+					idiv    gaussSum
+					mov     byte ptr [esi][edi], al
+					inc     edi
+
+				.else
+					
+					; offset2 += gaussHalf * 3
+					mov     eax, gaussHalf
+					imul    eax, 3
+					add     ebx, eax
+
+					mov     edx, imgOffset
+
+					; save b pixel
+					mov     al, byte ptr [ebx]
+					mov     byte ptr [edx][edi], al
+					inc     edi
+
+					; save g pixel
+					mov     al, byte ptr [ebx][1]
+					mov     byte ptr [edx][edi], al
+					inc     edi
+
+					; save r pixel
+					mov     al, byte ptr [ebx][2]
+					mov     byte ptr [edx][edi], al
+					inc     edi
+
+					add     ebx, 3
+
+				.endif
+
+				; ########## Actions of x loop ends #########
+				; Increment x counter
+				mov     eax, x
+				inc     eax
+				mov     x, eax
+				jmp     @x1LoopStart
+
+			@x1LoopEnd:
+
+			add     edi, rowPaddedDiff
+
+		; ########## Actions of y loop ends ##########
+		; Increment y counter
+		mov     eax, y
+		inc     eax
+		mov     y, eax
+		jmp     @yLoopStart
+
+	@yLoopEnd:
+		ret
 
 SecondIteration endp
 
