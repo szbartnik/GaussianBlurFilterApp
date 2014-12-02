@@ -65,6 +65,7 @@ ComputeGaussMaskSum endp
 
 FirstIteration proc args:PARAMS
 	
+	LOCAL imgOffset    : DWORD
 	LOCAL offset1      : DWORD
 
 	LOCAL maxY         : DWORD
@@ -84,7 +85,8 @@ FirstIteration proc args:PARAMS
 	
 	; Compute imgOffset
 	mov     ebx, args.imgPtr
-	add     ebx, args.imgOffset ; ebx stores imgOffset
+	add     ebx, args.imgOffset
+	mov     imgOffset, ebx
 
 	xor     eax, eax
 	mov     edi, eax          ; edi stores currPosition
@@ -102,7 +104,7 @@ FirstIteration proc args:PARAMS
 		
 		; Compute offset1
 		imul    eax, rowPadded
-		add     eax, ebx  ; ebx stores imgOffset
+		add     eax, imgOffset
 		mov     offset1, eax
 
 		mov     eax, currY
