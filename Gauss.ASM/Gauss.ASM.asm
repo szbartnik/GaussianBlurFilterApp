@@ -4,10 +4,6 @@
 option casemap :none
 .xmm
 
-include \masm32\include\windows.inc
-include \masm32\include\kernel32.inc
-includelib \masm32\lib\kernel32.lib
-
 .data
 
 rowPadded      dd ?
@@ -167,7 +163,7 @@ FirstIteration proc args:PARAMS, tempImg:DWORD
 				pextrw  eax, XMM3, 0
 				cwd
 				cdq
-				idiv    gaussSum
+				div    gaussSum
 				mov     byte ptr [esi][edi], al
 				inc     edi
 
@@ -175,7 +171,7 @@ FirstIteration proc args:PARAMS, tempImg:DWORD
 				pextrw  eax, XMM3, 2
 				cwd
 				cdq
-				idiv    gaussSum
+				div    gaussSum
 				mov     byte ptr [esi][edi], al
 				inc     edi
 
@@ -183,7 +179,7 @@ FirstIteration proc args:PARAMS, tempImg:DWORD
 				pextrw  eax, XMM3, 4
 				cwd
 				cdq
-				idiv    gaussSum
+				div    gaussSum
 				mov     byte ptr [esi][edi], al
 				inc     edi
 
@@ -216,22 +212,18 @@ FirstIteration proc args:PARAMS, tempImg:DWORD
 
 				mov     ebx, tempImg
 
-				mov eax, args.imgPartId;
-				inc eax
-				shl eax, 5
-
 				; save b pixel
-				;mov     al, byte ptr [esi]
+				mov     al, byte ptr [esi]
 				mov     byte ptr [ebx][edi], al
 				inc     edi
 
 				; save g pixel
-				;mov     al, byte ptr [esi][1]
+				mov     al, byte ptr [esi][1]
 				mov     byte ptr [ebx][edi], al
 				inc     edi
 
 				; save r pixel
-				;mov     al, byte ptr [esi][2]
+				mov     al, byte ptr [esi][2]
 				mov     byte ptr [ebx][edi], al
 				inc     edi
 
@@ -403,7 +395,7 @@ SecondIteration proc args:PARAMS, tempImg:DWORD
 					pextrw  eax, XMM3, 0
 					cwd
 					cdq
-					idiv    gaussSum
+					div    gaussSum
 					mov     byte ptr [esi][edi], al
 					inc     edi
 
@@ -411,7 +403,7 @@ SecondIteration proc args:PARAMS, tempImg:DWORD
 					pextrw  eax, XMM3, 2
 					cwd
 					cdq
-					idiv    gaussSum
+					div    gaussSum
 					mov     byte ptr [esi][edi], al
 					inc     edi
 
@@ -419,7 +411,7 @@ SecondIteration proc args:PARAMS, tempImg:DWORD
 					pextrw  eax, XMM3, 4
 					cwd
 					cdq
-					idiv    gaussSum
+					div    gaussSum
 					mov     byte ptr [esi][edi], al
 					inc     edi
 
@@ -431,10 +423,6 @@ SecondIteration proc args:PARAMS, tempImg:DWORD
 					add     ebx, eax
 
 					mov     esi, imgOffset ; esi now stores imgOffset
-
-					;mov eax, args.imgPartId;
-					;inc eax
-					;shl eax, 5
 
 					; save b pixel
 					mov     al, byte ptr [ebx]
