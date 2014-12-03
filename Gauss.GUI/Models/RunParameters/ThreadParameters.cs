@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 namespace Gauss.GUI.Models.RunParameters
@@ -13,10 +14,24 @@ namespace Gauss.GUI.Models.RunParameters
         public int IdOfImgPart;
         public int NumOfImgParts;
         public unsafe uint* ImgByteArrayPtr;
+        public unsafe uint* TempImgByteArrayPtr;
 
-        public override string ToString()
+        public override unsafe string ToString()
         {
-            return string.Format("ThreadID: {0}; Width: {1}; Height: {2}; NumOfParts: {3}; ThreadOffset: {4}", IdOfImgPart, ImgWidth, ImgHeight, NumOfImgParts, CurrentImgOffset);
+            return string.Format("ThreadID: {0}; " +
+                                 "Width: {1}; " +
+                                 "Height: {2}; " +
+                                 "NumOfParts: {3}; " +
+                                 "ThreadOffset: {4}; " +
+                                 "ImgPtr: {5}; " +
+                                 "TempImgPtr: {6}", 
+                                 IdOfImgPart, 
+                                 ImgWidth, 
+                                 ImgHeight, 
+                                 NumOfImgParts, 
+                                 CurrentImgOffset,
+                                 new IntPtr(ImgByteArrayPtr).ToInt32(),
+                                 new IntPtr(TempImgByteArrayPtr).ToInt32());
         }
     }
 }

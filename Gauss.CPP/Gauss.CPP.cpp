@@ -1,12 +1,6 @@
 #include "stdafx.h"
 #include "Gauss.CPP.h"
 
-BYTE* AllocateArray(int size)
-{
-	BYTE* toReturn = new BYTE[size];
-	return toReturn;
-}
-
 int* ComputePascalRow(int n)
 {
 	int* row = new int[n + 1];
@@ -29,7 +23,7 @@ void ComputeGaussBlur(ThreadParameters params)
 
 	int gaussHalf = params.GaussMaskSize / 2;
 
-	BYTE* temp = AllocateArray(row_padded * params.ImageHeight);
+	BYTE* temp = params.TempImgByteArrayPtr;
 
 	const int gauss_w = params.GaussMaskSize; // must be odd
 
@@ -148,6 +142,4 @@ void ComputeGaussBlur(ThreadParameters params)
 
 		currPos += row_padded_diff;
 	}
-
-	delete[] temp;
 }

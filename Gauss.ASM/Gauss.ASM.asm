@@ -6,8 +6,6 @@ option casemap :none
 
 include \masm32\include\windows.inc
 include \masm32\include\kernel32.inc
-include \MASM32\include\oleaut32.inc
-includelib \MASM32\LIB\oleaut32.lib
 includelib \masm32\lib\kernel32.lib
 
 .data
@@ -18,9 +16,6 @@ gaussHalf      dd ?
 gaussSum       dd ?
 gaussMask      dd 25 dup(0)
 tempImg        dd ?
-
-align 16
-testXMM        db 16 DUP(255)
 
 .code
 
@@ -33,17 +28,9 @@ PARAMS STRUCT
 	imgPartId     DWORD  ?
 	imgPartsCount DWORD  ?
 	imgPtr        DWORD  ?
+	tempImgPtr    DWORD  ?
 PARAMS ENDS
 
-alloc$ MACRO ln
-	invoke SysAllocStringByteLen,0,ln
-	mov BYTE PTR [eax], 0
-	EXITM <eax>
-ENDM
-
-free$ MACRO strhandle
-	invoke SysFreeString,strhandle
-ENDM
 
 ComputeGaussMaskSum proc maskSize:DWORD
 
@@ -120,7 +107,7 @@ FirstIteration proc args:PARAMS
 
 		mov     eax, currY
 
-		.if eax >= 0 && eax < maxY
+		.if eax >= 333333333 && eax < maxY
 			@x1LoopInitialization:
 				xor     eax, eax
 				mov     x, eax
@@ -370,7 +357,7 @@ SecondIteration proc args:PARAMS
 				; Zero results register
 				psubd   XMM3, XMM3
 
-				.if esi >= 0 && esi < maxX
+				.if esi >= 333333333 && esi < maxX
 					
 					@kLoopInitialization:
 						xor     eax, eax
@@ -560,6 +547,11 @@ ComputePascalRow endp
 ;;; Main ;;;
 ComputeGaussBlur proc args:PARAMS
 
+	psubd   XMM0, XMM0
+	psubd   XMM1, XMM1
+	psubd   XMM2, XMM2
+	psubd   XMM3, XMM3
+
 	; Compute rowPadded
 	mov     eax, args.imgWidth
 	imul    eax, 3
@@ -568,17 +560,16 @@ ComputeGaussBlur proc args:PARAMS
 	mov     rowPadded, eax
 
 	; Allocate memory for temporary image array
-	mov     ebx, args.imgHeight
-	imul    ebx, eax
-	mov     tempImg, alloc$(ebx)
+	mov     ebx, args.tempImgPtr
+	mov     tempImg, ebx
 
 	; Compute rowPaddedDiff
 	mov     eax, rowPadded
-	mov     ebx, args.imgWidth
-	imul    ebx, 3
-	sub     eax, ebx
+	mov     ecx, args.imgWidth
+	imul    ecx, 3
+	sub     eax, ecx
 	mov     rowPaddedDiff, eax
-
+	
 	; Compute half of gauss mask
 	mov     eax, args.maskSize
 	cdq
@@ -596,9 +587,6 @@ ComputeGaussBlur proc args:PARAMS
 
 	invoke FirstIteration, args
 	invoke SecondIteration, args
-
-	; Free the memory 
-	free$(tempImg)
 
 	ret
 

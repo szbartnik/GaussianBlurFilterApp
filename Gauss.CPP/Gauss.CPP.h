@@ -17,6 +17,7 @@ struct ThreadParameters
 	int IdOfImgPart;
 	int NumOfImgParts;
 	unsigned char* ImgByteArrayPtr;
+	unsigned char* TempImgByteArrayPtr;
 };
 
 API void ComputeGaussBlur(ThreadParameters threadParameters);

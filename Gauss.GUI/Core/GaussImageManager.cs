@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Gauss.GUI.Models;
@@ -52,9 +51,12 @@ namespace Gauss.GUI.Core
                             generatorParams: generatorParams,
                             imageSizes: imgSizes);
 
-                        Console.WriteLine(currentThreadParams.ToString());
-
-                        RunUnsafeImageGenerationCode(currentThreadParams, generatorParams.GeneratingLibrary);
+                        //if(currentThreadParams.IdOfImgPart == 0)
+                            //Thread.Sleep(200);
+                        
+                        RunUnsafeImageGenerationCode(
+                            currentThreadParams: currentThreadParams, 
+                            genLibrary: generatorParams.GeneratingLibrary);
                     });
                 }
 
@@ -124,11 +126,20 @@ namespace Gauss.GUI.Core
             return numOfLinesPerThread;
         }
 
-        private unsafe void RunUnsafeImageGenerationCode(ThreadParameters currentThreadParams, GeneratingLibrary genLibrary)
+        private unsafe void RunUnsafeImageGenerationCode(
+            ThreadParameters currentThreadParams, 
+            GeneratingLibrary genLibrary)
         {
-            fixed (byte* imgArray = SourceFile)
+            int rowPadded = (currentThreadParams.ImgWidth * 3 + 3) & (~3);
+            var tmpArray = new byte[currentThreadParams.ImgHeight * rowPadded];
+
+            fixed(byte* imgArrayPtr = SourceFile)
+            fixed(byte* tmpArrayPtr = tmpArray)
             {
-                currentThreadParams.ImgByteArrayPtr = (uint*)(&imgArray[54]);
+                currentThreadParams.ImgByteArrayPtr = (uint*) (&imgArrayPtr[54]);
+                currentThreadParams.TempImgByteArrayPtr = (uint*) (tmpArrayPtr);
+
+                Console.WriteLine(currentThreadParams.ToString());
 
                 switch (genLibrary)
                 {
@@ -138,7 +149,8 @@ namespace Gauss.GUI.Core
                     case GeneratingLibrary.CPP:
                         ComputeGaussBlurCpp(currentThreadParams);
                         break;
-                    default: throw new NotImplementedException();
+                    default:
+                        throw new NotImplementedException();
                 }
             }
         }
