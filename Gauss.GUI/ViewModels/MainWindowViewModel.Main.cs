@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Timers;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 using Gauss.GUI.Core;
 using Gauss.GUI.Infrastructure;
@@ -161,7 +157,7 @@ namespace Gauss.GUI.ViewModels
 
         private void InitializeProperties()
         {
-            NumberOfThreads = 1;
+            NumberOfThreads = 2;
             BlurIterations = 1;
             GeneratingLibrary = GeneratingLibrary.ASM;
             GaussMaskSize = 3;

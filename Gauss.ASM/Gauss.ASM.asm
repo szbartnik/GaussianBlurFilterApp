@@ -6,7 +6,8 @@ option casemap :none
 
 include \masm32\include\windows.inc
 include \masm32\include\kernel32.inc
-include \masm32\macros\macros.asm
+include \MASM32\include\oleaut32.inc
+includelib \MASM32\LIB\oleaut32.lib
 includelib \masm32\lib\kernel32.lib
 
 .data
@@ -33,6 +34,16 @@ PARAMS STRUCT
 	imgPartsCount DWORD  ?
 	imgPtr        DWORD  ?
 PARAMS ENDS
+
+alloc$ MACRO ln
+	invoke SysAllocStringByteLen,0,ln
+	mov BYTE PTR [eax], 0
+	EXITM <eax>
+ENDM
+
+free$ MACRO strhandle
+	invoke SysFreeString,strhandle
+ENDM
 
 ComputeGaussMaskSum proc maskSize:DWORD
 
@@ -559,7 +570,7 @@ ComputeGaussBlur proc args:PARAMS
 	; Allocate memory for temporary image array
 	mov     ebx, args.imgHeight
 	imul    ebx, eax
-	mov     tempImg, alloc(ebx)
+	mov     tempImg, alloc$(ebx)
 
 	; Compute rowPaddedDiff
 	mov     eax, rowPadded
@@ -587,7 +598,7 @@ ComputeGaussBlur proc args:PARAMS
 	invoke SecondIteration, args
 
 	; Free the memory 
-	free(tempImg)
+	free$(tempImg)
 
 	ret
 
