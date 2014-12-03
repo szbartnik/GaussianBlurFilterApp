@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Gauss.GUI.Models;
@@ -12,7 +13,7 @@ namespace Gauss.GUI.Core
     {
         #region DLL Imports
 
-        [DllImport("Gauss.ASM.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]
+        [DllImport("Gauss.ASM.dll", EntryPoint = "ComputeGaussBlur")]
         private static extern int ComputeGaussBlurAsm(ThreadParameters threadParameters);
 
         [DllImport("Gauss.CPP.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ComputeGaussBlur")]
@@ -51,9 +52,6 @@ namespace Gauss.GUI.Core
                             generatorParams: generatorParams,
                             imageSizes: imgSizes);
 
-                        //if(currentThreadParams.IdOfImgPart == 0)
-                            //Thread.Sleep(200);
-                        
                         RunUnsafeImageGenerationCode(
                             currentThreadParams: currentThreadParams, 
                             genLibrary: generatorParams.GeneratingLibrary);

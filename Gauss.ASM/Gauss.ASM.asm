@@ -15,7 +15,6 @@ rowPaddedDiff  dd ?
 gaussHalf      dd ?
 gaussSum       dd ?
 gaussMask      dd 25 dup(0)
-tempImg        dd ?
 
 .code
 
@@ -61,7 +60,7 @@ ComputeGaussMaskSum proc maskSize:DWORD
 
 ComputeGaussMaskSum endp
 
-FirstIteration proc args:PARAMS
+FirstIteration proc args:PARAMS, tempImg:DWORD
 	
 	LOCAL imgOffset    : DWORD
 	LOCAL offset1      : DWORD
@@ -82,9 +81,9 @@ FirstIteration proc args:PARAMS
 	mov     maxY, eax
 	
 	; Compute imgOffset
-	mov     ebx, args.imgPtr
-	add     ebx, args.imgOffset
-	mov     imgOffset, ebx
+	mov     esi, args.imgPtr
+	add     esi, args.imgOffset
+	mov     imgOffset, esi
 
 	xor     eax, eax
 	mov     edi, eax          ; edi stores currPosition
@@ -107,7 +106,7 @@ FirstIteration proc args:PARAMS
 
 		mov     eax, currY
 
-		.if eax >= 333333333 && eax < maxY
+		.if eax > 0 && eax < maxY
 			@x1LoopInitialization:
 				xor     eax, eax
 				mov     x, eax
@@ -122,11 +121,11 @@ FirstIteration proc args:PARAMS
 				; Compute offset2
 				imul    eax, 3
 				add     eax, offset1
-				mov     ebx, eax ; ebx stores offset2
+				mov     esi, eax ; esi stores offset2
 
 				; Zero results register
 				psubd   XMM3, XMM3
-
+				
 				@kLoopInitialization:
 					xor     eax, eax
 					mov     k, eax
@@ -139,7 +138,7 @@ FirstIteration proc args:PARAMS
 					; ########## Actions of k loop begins ##########
 
 					; Offsets init part
-					movd      XMM1, dword ptr [ebx]
+					movd      XMM1, dword ptr [esi]
 					punpcklbw XMM1, XMM0
 					punpcklwd XMM1, XMM0
 
@@ -151,7 +150,7 @@ FirstIteration proc args:PARAMS
 
 					paddw     XMM3, XMM1 ; linc +=
 
-					add     ebx, rowPadded
+					add     esi, rowPadded
 				
 					; ########## Actions of k loop ends #########
 					; Increment k counter
@@ -162,14 +161,14 @@ FirstIteration proc args:PARAMS
 
 				@kLoopEnd:
 
-				mov     ebx, tempImg ; ebx now stores tempImg ptr
+				mov     esi, tempImg ; esi now stores tempImg ptr
 
 				; save b pixel
 				pextrw  eax, XMM3, 0
 				cwd
 				cdq
 				idiv    gaussSum
-				mov     byte ptr [ebx][edi], al
+				mov     byte ptr [esi][edi], al
 				inc     edi
 
 				; save g pixel
@@ -177,7 +176,7 @@ FirstIteration proc args:PARAMS
 				cwd
 				cdq
 				idiv    gaussSum
-				mov     byte ptr [ebx][edi], al
+				mov     byte ptr [esi][edi], al
 				inc     edi
 
 				; save r pixel
@@ -185,7 +184,7 @@ FirstIteration proc args:PARAMS
 				cwd
 				cdq
 				idiv    gaussSum
-				mov     byte ptr [ebx][edi], al
+				mov     byte ptr [esi][edi], al
 				inc     edi
 
 
@@ -203,7 +202,7 @@ FirstIteration proc args:PARAMS
 				mov     eax, gaussHalf
 				imul    eax, rowPadded
 				add     eax, offset1
-				mov     ebx, eax ; ebx stores offset2
+				mov     esi, eax ; esi stores offset2
 				
 				xor     eax, eax
 				mov     x, eax
@@ -215,24 +214,28 @@ FirstIteration proc args:PARAMS
 
 				; ########## Actions of x loop begins ##########
 
-				mov     edx, tempImg
+				mov     ebx, tempImg
+
+				mov eax, args.imgPartId;
+				inc eax
+				shl eax, 5
 
 				; save b pixel
-				mov     al, byte ptr [ebx]
-				mov     byte ptr [edx][edi], al
+				;mov     al, byte ptr [esi]
+				mov     byte ptr [ebx][edi], al
 				inc     edi
 
 				; save g pixel
-				mov     al, byte ptr [ebx][1]
-				mov     byte ptr [edx][edi], al
+				;mov     al, byte ptr [esi][1]
+				mov     byte ptr [ebx][edi], al
 				inc     edi
 
 				; save r pixel
-				mov     al, byte ptr [ebx][2]
-				mov     byte ptr [edx][edi], al
+				;mov     al, byte ptr [esi][2]
+				mov     byte ptr [ebx][edi], al
 				inc     edi
 
-				add     ebx, 3
+				add     esi, 3
 
 				; ########## Actions of x loop ends #########
 				; Increment x counter
@@ -258,7 +261,7 @@ FirstIteration proc args:PARAMS
 
 FirstIteration endp
 
-SecondIteration proc args:PARAMS
+SecondIteration proc args:PARAMS, tempImg:DWORD
 
 	LOCAL beginCopy    : DWORD
 	LOCAL endCopy      : DWORD
@@ -357,7 +360,7 @@ SecondIteration proc args:PARAMS
 				; Zero results register
 				psubd   XMM3, XMM3
 
-				.if esi >= 333333333 && esi < maxX
+				.if esi >= 0 && esi < maxX
 					
 					@kLoopInitialization:
 						xor     eax, eax
@@ -427,21 +430,25 @@ SecondIteration proc args:PARAMS
 					imul    eax, 3
 					add     ebx, eax
 
-					mov     edx, imgOffset
+					mov     esi, imgOffset ; esi now stores imgOffset
+
+					;mov eax, args.imgPartId;
+					;inc eax
+					;shl eax, 5
 
 					; save b pixel
 					mov     al, byte ptr [ebx]
-					mov     byte ptr [edx][edi], al
+					mov     byte ptr [esi][edi], al
 					inc     edi
 
 					; save g pixel
 					mov     al, byte ptr [ebx][1]
-					mov     byte ptr [edx][edi], al
+					mov     byte ptr [esi][edi], al
 					inc     edi
 
 					; save r pixel
 					mov     al, byte ptr [ebx][2]
-					mov     byte ptr [edx][edi], al
+					mov     byte ptr [esi][edi], al
 					inc     edi
 
 					add     ebx, 3
@@ -547,6 +554,8 @@ ComputePascalRow endp
 ;;; Main ;;;
 ComputeGaussBlur proc args:PARAMS
 
+	LOCAL tempImg:DWORD
+
 	psubd   XMM0, XMM0
 	psubd   XMM1, XMM1
 	psubd   XMM2, XMM2
@@ -585,8 +594,8 @@ ComputeGaussBlur proc args:PARAMS
 	; Compute Gauss mask sum
 	invoke ComputeGaussMaskSum, args.maskSize
 
-	invoke FirstIteration, args
-	invoke SecondIteration, args
+	invoke FirstIteration, args, tempImg
+	invoke SecondIteration, args, tempImg
 
 	ret
 
