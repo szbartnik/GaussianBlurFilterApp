@@ -69,26 +69,34 @@ ComputeGaussMaskSum endp
 ; ==========================================================================
 ; First iteration of the gauss blur algorithm. This part iterates over
 ; surrounding lines vertically (averages up/down pixels of every pixel)
+;
+; ### PARAMS ###
+; - args (PARAMS): Current thread parameters structure
+; - tempImg (DWORD): Temporary bitmap array pointer used to store partial result
+; - rowPadded (DWORD): The pixel array must begin at a memory address 
+;                      that is a multiple of 4 bytes
+; - rowPaddedDiff (DWORD): Difference between rowPadded and real row width
+; - gaussHalf (DWORD): Half of gauss mask
+; - gaussSum (DWORD): Gauss mask sum
+; - gaussMask (DWORD): Gauss mask pointer
 ; ==========================================================================
-FirstIteration proc args:PARAMS,     ; Current thread parameters structure
-                tempImg:DWORD,       ; Temporary bitmap array pointer used to store 
-								     ; partial result after first gauss blur iteration
-                rowPadded:DWORD,     ; The pixel array must begin at a memory address 
-	                                 ; that is a multiple of 4 bytes
-                rowPaddedDiff:DWORD, ; Difference between rowPadded and real row width
-                gaussHalf:DWORD,     ; Half of gauss mask (DWORD)
-                gaussSum:DWORD,      ; Gauss mask sum
-                gaussMask:PTR DWORD  ; Gauss mask pointer
+FirstIteration proc args     :PARAMS,
+                tempImg      :DWORD,
+                rowPadded    :DWORD,
+                rowPaddedDiff:DWORD,
+                gaussHalf    :DWORD,
+                gaussSum     :DWORD,
+                gaussMask    :PTR DWORD 
 
     
-    LOCAL imgOffset    : DWORD       ; 
-    LOCAL offset1      : DWORD       ; 
+    LOCAL imgOffset    : DWORD          ; Stores current thread bitmap part offset
+    LOCAL offset1      : DWORD          ; Stores offset to the current line of source bitmap 
 
-    LOCAL maxY         : DWORD       ; 
-    LOCAL currY        : DWORD       ; Current Y
-    LOCAL x            : DWORD       ; Current bitmap pixel X position
-    LOCAL y            : DWORD       ; Current bitmap pixel Y position
-    LOCAL k            : DWORD       ; Current gauss mask position
+    LOCAL maxY         : DWORD          ; Stores maximum y position that can be averaged (height - gaussWidth + 1)
+    LOCAL currY        : DWORD          ; Stores current y position reduced by half of gauss mask
+    LOCAL x            : DWORD          ; Current bitmap pixel X position
+    LOCAL y            : DWORD          ; Current bitmap pixel Y position
+    LOCAL k            : DWORD          ; Current gauss mask position
     
     ; Mask load
     mov     eax, gaussMask
@@ -126,10 +134,10 @@ FirstIteration proc args:PARAMS,     ; Current thread parameters structure
 
         mov     eax, currY
 
-		; --------------------------------------------------------- 
-		; If |current line - gaussHalf| is in bounds of data array
-		; (edges of the bitmap)
-		; ---------------------------------------------------------
+        ; --------------------------------------------------------- 
+        ; If |current line - gaussHalf| is in bounds of data array
+        ; (edges of the bitmap)
+        ; ---------------------------------------------------------
         .if eax > 0 && eax < maxY
             @x1LoopInitialization:
                 xor     eax, eax
@@ -219,11 +227,11 @@ FirstIteration proc args:PARAMS,     ; Current thread parameters structure
                 jmp     @x1LoopStart
 
             @x1LoopEnd:
-			
-		; ------------------------------------------------------------- 
-		; If |current line - gaussHalf| is not in bounds of data array
-		; (edges of the bitmap)
-		; -------------------------------------------------------------
+            
+        ; ------------------------------------------------------------- 
+        ; If |current line - gaussHalf| is not in bounds of data array
+        ; (edges of the bitmap)
+        ; -------------------------------------------------------------
         .else
             @x2LoopInitialization:
                 ; Compute offset2
@@ -289,27 +297,35 @@ FirstIteration endp
 ; ==========================================================================
 ; Second iteration of the gauss blur algorithm. This part iterates over
 ; surrounding lines horizontally (averages left/right pixels of every pixel)
+;
+; ### PARAMS ###
+; - args (PARAMS): Current thread parameters structure
+; - tempImg (DWORD): Temporary bitmap array pointer used to store partial result
+; - rowPadded (DWORD): The pixel array must begin at a memory address 
+;                      that is a multiple of 4 bytes
+; - rowPaddedDiff (DWORD): Difference between rowPadded and real row width
+; - gaussHalf (DWORD): Half of gauss mask
+; - gaussSum (DWORD): Gauss mask sum
+; - gaussMask (DWORD): Gauss mask pointer
 ; ==========================================================================
-SecondIteration proc args:PARAMS,     ; Current thread parameters structure
-                 tempImg:DWORD,       ; Temporary bitmap array pointer used to store 
-									  ; partial result after first gauss blur iteration
-                 rowPadded:DWORD,     ; The pixel array must begin at a memory address 
-	                                  ; that is a multiple of 4 bytes
-                 rowPaddedDiff:DWORD, ; Difference between rowPadded and real row width
-                 gaussHalf:DWORD,     ; Half of gauss mask (DWORD)
-                 gaussSum:DWORD,      ; Gauss mask sum
-                 gaussMask:PTR DWORD  ; Gauss mask pointer
+SecondIteration proc args     :PARAMS, 
+                 tempImg      :DWORD,
+                 rowPadded    :DWORD,
+                 rowPaddedDiff:DWORD,
+                 gaussHalf    :DWORD,
+                 gaussSum     :DWORD,
+                 gaussMask    :PTR DWORD
 
-    LOCAL beginCopy    : DWORD ; 
-    LOCAL endCopy      : DWORD ; 
+    LOCAL beginCopy    : DWORD           ; Stores computed start of a fragment of bitmap to copy to the output
+    LOCAL endCopy      : DWORD           ; Stores computed ejd of a fragment of bitmap to copy to the output
  
-    LOCAL imgOffset    : DWORD ; 
-    LOCAL offset1      : DWORD ; 
+    LOCAL imgOffset    : DWORD           ; Stores current thread bitmap part offset
+    LOCAL offset1      : DWORD           ; Stores offset to the current line of source bitmap 
 
-    LOCAL maxX         : DWORD ; 
-    LOCAL x            : DWORD ; 
-    LOCAL y            : DWORD ; 
-    LOCAL k            : DWORD ; 
+    LOCAL maxX         : DWORD           ; Stores maximum y position that can be averaged (height - gaussWidth + 1)
+    LOCAL x            : DWORD           ; Current bitmap pixel X position
+    LOCAL y            : DWORD           ; Current bitmap pixel Y position
+    LOCAL k            : DWORD           ; Current gauss mask position
 
     ; Compute imgOffset
     mov     ebx, args.imgPtr
@@ -393,10 +409,10 @@ SecondIteration proc args:PARAMS,     ; Current thread parameters structure
                 ; Zero results register
                 psubd   XMM3, XMM3
 
-				; ---------------------------------------------------------------------
-				; If |current pixel X position - gaussHalf| is in bounds of data array
-				; (edges of the bitmap)
-				; ---------------------------------------------------------------------
+                ; ---------------------------------------------------------------------
+                ; If |current pixel X position - gaussHalf| is in bounds of data array
+                ; (edges of the bitmap)
+                ; ---------------------------------------------------------------------
                 .if esi >= 0 && esi < maxX
                     
                     @kLoopInitialization:
@@ -458,11 +474,11 @@ SecondIteration proc args:PARAMS,     ; Current thread parameters structure
                     mov     byte ptr [esi][edi], al
                     inc     edi
 
-				; -------------------------------------------------------------------------
-				; If |current pixel X position - gaussHalf| is not in bounds of data array
-				; (edges of the bitmap)
-				; -------------------------------------------------------------------------
-				.else
+                ; -------------------------------------------------------------------------
+                ; If |current pixel X position - gaussHalf| is not in bounds of data array
+                ; (edges of the bitmap)
+                ; -------------------------------------------------------------------------
+                .else
                     ; Offset2 += gaussHalf * 3
                     mov     eax, gaussHalf
                     imul    eax, 3
@@ -545,7 +561,7 @@ ComputePascalRow proc maskSize:DWORD, gaussMask:PTR DWORD
 
     ; --------------
     ; - First loop -
-	; --------------
+    ; --------------
     @startOfFirstLoop:
         cdq
         sub     eax, edx
@@ -573,7 +589,7 @@ ComputePascalRow proc maskSize:DWORD, gaussMask:PTR DWORD
 
     ; ---------------
     ; - Second loop -
-	; ---------------
+    ; ---------------
     @secondGaussIteration:
 
         mov     eax, counter
@@ -610,15 +626,15 @@ ComputePascalRow endp
 ComputeGaussBlur proc args:PARAMS
 
     LOCAL tempImg       :DWORD ; Temporary bitmap array pointer used to store 
-	                           ; partial result after first gauss blur iteration
+                               ; partial result after first gauss blur iteration
     LOCAL rowPadded     :DWORD ; The pixel array must begin at a memory address 
-	                           ; that is a multiple of 4 bytes
+                               ; that is a multiple of 4 bytes
     LOCAL rowPaddedDiff :DWORD ; Difference between rowPadded and real row width
     LOCAL gaussHalf     :DWORD ; Half of gauss mask (DWORD)
     LOCAL gaussSum      :DWORD ; Gauss mask sum
     LOCAL gaussMask[25] :DWORD ; Gauss mask pointer
 
-	; Nullify used XMM registers
+    ; Nullify used XMM registers
     psubd   XMM0, XMM0
     psubd   XMM1, XMM1
     psubd   XMM2, XMM2
@@ -659,7 +675,7 @@ ComputeGaussBlur proc args:PARAMS
     mov     gaussSum, eax
 
     ; Process Gauss
-    invoke FirstIteration, args, tempImg, rowPadded, rowPaddedDiff, gaussHalf, gaussSum, ADDR gaussMask
+    invoke FirstIteration,  args, tempImg, rowPadded, rowPaddedDiff, gaussHalf, gaussSum, ADDR gaussMask
     invoke SecondIteration, args, tempImg, rowPadded, rowPaddedDiff, gaussHalf, gaussSum, ADDR gaussMask
 
     ret

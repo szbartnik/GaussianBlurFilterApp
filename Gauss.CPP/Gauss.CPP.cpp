@@ -40,6 +40,8 @@ void ComputeGaussBlur(ThreadParameters params)
 	int currPos = 0; // stores position (in bytes) of current position 
 	                 // of temporary bitmap array data
 	int maxY = params.ImageHeight - gaussWidth + 1;
+
+	// Stores current thread bitmap part offset
 	BYTE* imgOffset = &params.ImgByteArrayPtr[params.CurrentImgOffset];
 
 	/*
