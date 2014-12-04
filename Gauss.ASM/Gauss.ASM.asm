@@ -6,18 +6,25 @@ option casemap :none
 
 .code
 
+; ==============================================================
+; Structure representing thread parameters structure
+; used to store & pass information about thread and calculated
+; bitmap settings to the ComputeGaussBlur method.
+; ==============================================================
 PARAMS STRUCT
-    maskSize      DWORD  ?
-    imgOffset     DWORD  ?
-    imgWidth      DWORD  ?
-    imgHeight     DWORD  ?
-    imgPartId     DWORD  ?
-    imgPartsCount DWORD  ?
-    imgPtr        DWORD  ?
-    tempImgPtr    DWORD  ?
+    maskSize      DWORD  ? ; Gauss mask size (width)
+    imgOffset     DWORD  ? ; Offset relative to the bitmap pixels data start (bytes)
+    imgWidth      DWORD  ? ; Width of the bitmap in pixels
+    imgHeight     DWORD  ? ; Height of the bitmap in pixels
+    imgPartId     DWORD  ? ; Number of part of the bitmap passed to the current thread
+    imgPartsCount DWORD  ? ; Total number of bitmap parts (number of threads)
+    imgPtr        DWORD  ? ; Pointer to the beginning of bitmap pixels data section
+    tempImgPtr    DWORD  ? ; Pointer to the beginning of the temporary bimap 
 PARAMS ENDS
 
-
+; ========================================
+; Computes gauss mask sum
+; ========================================
 ComputeGaussMaskSum proc maskSize:DWORD, gaussMask: PTR DWORD
 
     LOCAL counter  :DWORD
@@ -50,6 +57,8 @@ ComputeGaussMaskSum proc maskSize:DWORD, gaussMask: PTR DWORD
     ret
 
 ComputeGaussMaskSum endp
+
+; ¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤
 
 FirstIteration proc args:PARAMS, 
                  tempImg:DWORD, 
@@ -255,6 +264,8 @@ FirstIteration proc args:PARAMS,
         ret
 
 FirstIteration endp
+
+; ¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤
 
 SecondIteration proc args:PARAMS, 
                  tempImg:DWORD, 
@@ -475,7 +486,11 @@ SecondIteration proc args:PARAMS,
 
 SecondIteration endp
 
-; Computes specified pascal triangle row (max 24)
+; ¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤*¤
+
+; ==========================================================================
+; Computes pascal triangle row basing on passed gauss triangle row (max 24)
+; ==========================================================================
 ComputePascalRow proc maskSize:DWORD, gaussMask:PTR DWORD
 
     LOCAL counter:DWORD
@@ -496,8 +511,8 @@ ComputePascalRow proc maskSize:DWORD, gaussMask:PTR DWORD
         mov     counter, eax
         mov     eax, maskSize
 
-        ;;;;;;;;;;;;;;;;;;
-        ;;; First loop ;;;
+    ;;;;;;;;;;;;;;;;;;
+    ;;; First loop ;;;
     @startOfFirstLoop:
         cdq
         sub     eax, edx
