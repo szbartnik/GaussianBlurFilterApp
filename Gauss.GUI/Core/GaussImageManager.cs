@@ -101,7 +101,6 @@ namespace Gauss.GUI.Core
             {
                 CurrentImgOffset = sumOfOffsetLines * rowPadded,
                 GaussMaskSize    = generatorParams.GaussMaskSize,
-                BlurLevel        = generatorParams.BlurLevel,
                 ImgWidth         = imageSizes.Width,
                 ImgHeight        = currentThreadImgHeight,
                 IdOfImgPart      = threadId,

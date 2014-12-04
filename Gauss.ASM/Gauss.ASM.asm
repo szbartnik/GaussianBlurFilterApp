@@ -9,7 +9,6 @@ option casemap :none
 PARAMS STRUCT
     maskSize      DWORD  ?
     imgOffset     DWORD  ?
-    blurLvl       DWORD  ?
     imgWidth      DWORD  ?
     imgHeight     DWORD  ?
     imgPartId     DWORD  ?

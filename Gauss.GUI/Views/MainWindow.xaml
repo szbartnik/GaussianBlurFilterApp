@@ -51,7 +51,7 @@
                 <StackPanel>
                     <TextBlock Text="Gauss mask size:" FontSize="12" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding ElementName=GaussMaskSizeSlider, Path=Value}" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-5" />
-                    <Slider x:Name="GaussMaskSizeSlider" Minimum="3" Maximum="25" VerticalAlignment="Center" TickFrequency="2" IsSnapToTickEnabled="True" Value="{Binding GaussMaskSize}"/>
+                    <Slider x:Name="GaussMaskSizeSlider" Minimum="3" Maximum="9" VerticalAlignment="Center" TickFrequency="2" IsSnapToTickEnabled="True" Value="{Binding GaussMaskSize}"/>
                 </StackPanel>
             </Border>
             <Border BorderBrush="DeepSkyBlue" BorderThickness="3" Margin="0 0 0 10" Padding="5" Background="White">

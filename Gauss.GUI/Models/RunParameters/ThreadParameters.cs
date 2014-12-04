@@ -8,7 +8,6 @@ namespace Gauss.GUI.Models.RunParameters
     {
         public int GaussMaskSize;
         public int CurrentImgOffset;
-        public int BlurLevel;
         public int ImgWidth;
         public int ImgHeight;
         public int IdOfImgPart;
