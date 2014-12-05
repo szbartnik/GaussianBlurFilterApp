@@ -12,6 +12,7 @@ option casemap :none
 ; bitmap settings to the ComputeGaussBlur method.
 ; ==============================================================
 PARAMS STRUCT
+    processId     DWORD  ? ; Id of the current process (for debugging)
     maskSize      DWORD  ? ; Gauss mask size (width)
     imgOffset     DWORD  ? ; Offset relative to the bitmap pixels data start (bytes)
     imgWidth      DWORD  ? ; Width of the bitmap in pixels

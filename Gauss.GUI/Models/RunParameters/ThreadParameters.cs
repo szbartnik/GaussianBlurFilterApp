@@ -6,6 +6,7 @@ namespace Gauss.GUI.Models.RunParameters
     [StructLayout(LayoutKind.Sequential)]
     public struct ThreadParameters
     {
+        public int ProcessId;
         public int GaussMaskSize;
         public int CurrentImgOffset;
         public int ImgWidth;
@@ -17,7 +18,8 @@ namespace Gauss.GUI.Models.RunParameters
 
         public override unsafe string ToString()
         {
-            return string.Format("ThreadID: {0}; " +
+            return string.Format("ProcessID: {7}; " +
+                                 "ThreadID: {0}; " +
                                  "Width: {1}; " +
                                  "Height: {2}; " +
                                  "NumOfParts: {3}; " +
@@ -30,7 +32,8 @@ namespace Gauss.GUI.Models.RunParameters
                                  NumOfImgParts, 
                                  CurrentImgOffset,
                                  new IntPtr(ImgByteArrayPtr).ToInt32(),
-                                 new IntPtr(TempImgByteArrayPtr).ToInt32());
+                                 new IntPtr(TempImgByteArrayPtr).ToInt32(),
+                                 ProcessId);
         }
     }
 }

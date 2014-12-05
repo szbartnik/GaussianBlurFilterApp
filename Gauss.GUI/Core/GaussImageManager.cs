@@ -22,6 +22,8 @@ namespace Gauss.GUI.Core
 
         private byte[] SourceFile { get; set; }
 
+        private int i;
+
         public GaussImageManager(string filename)
         {
             try
@@ -39,17 +41,25 @@ namespace Gauss.GUI.Core
             var tasks = new Task[generatorParams.NumberOfThreads];
             var imgSizes = GetLoadedImageSizes();
 
+            var processId = 0;
+
             while (generatorParams.BlurLevel-- > 0)
             {
-                for (int threadNum = 0; threadNum < tasks.Length; threadNum++)
+                processId++;
+
+                for (var threadNum = 0; threadNum < tasks.Length; threadNum++)
                 {
-                    int num = threadNum;
+                    var num = threadNum;
+                    var id = processId;
+
                     tasks[threadNum] = Task.Run(() =>
                     {
                         var currentThreadParams = ComputeThreadParams(
                             threadId: num,
                             generatorParams: generatorParams,
                             imageSizes: imgSizes);
+
+                        currentThreadParams.ProcessId = id;
 
                         RunUnsafeImageGenerationCode(
                             currentThreadParams: currentThreadParams, 
@@ -135,7 +145,7 @@ namespace Gauss.GUI.Core
                 currentThreadParams.ImgByteArrayPtr = (uint*) (&imgArrayPtr[54]);
                 currentThreadParams.TempImgByteArrayPtr = (uint*) (tmpArrayPtr);
 
-                Console.WriteLine(currentThreadParams.ToString());
+                Console.WriteLine("Start {0}", currentThreadParams);
 
                 switch (genLibrary)
                 {
@@ -148,6 +158,8 @@ namespace Gauss.GUI.Core
                     default:
                         throw new NotImplementedException();
                 }
+
+                Console.WriteLine("Stop {0}", currentThreadParams);
             }
         }
     }

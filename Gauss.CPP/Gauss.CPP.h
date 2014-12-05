@@ -17,6 +17,7 @@ typedef struct Pixel {
 */
 struct ThreadParameters
 {
+	int ProcessId;                      // Id of the current thread (for debugging)
 	int GaussMaskSize;                  // Gauss mask size (width)
 	int CurrentImgOffset;               // Offset relative to the bitmap pixels data start (bytes)
 	int ImageWidth;                     // Width of the bitmap in pixels
