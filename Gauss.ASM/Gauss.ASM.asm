@@ -21,7 +21,7 @@ PARAMS STRUCT
     imgPartsCount DWORD  ? ; Total number of bitmap parts (number of threads)
     imgPtr        DWORD  ? ; Pointer to the beginning of bitmap pixels data section
     tempImgPtr    DWORD  ? ; Pointer to the beginning of the temporary bimap 
-PARAMS ENDS
+PARAMS ends
 
 ; ==================================================
 ; Computes gauss mask sum
@@ -123,7 +123,7 @@ FirstIteration proc args     :PARAMS,
         cmp     eax, args.imgHeight
         jge     @yLoopEnd
 
-        ; ########## Actions of y loop begins ##########
+        ; ########## Actions of y loop begin ##########
         ; Compute currY
         sub     eax, gaussHalf
         mov     currY, eax
@@ -149,7 +149,7 @@ FirstIteration proc args     :PARAMS,
                 cmp     eax, args.imgWidth
                 jge     @x1LoopEnd
 
-                ; ########## Actions of x loop begins ##########
+                ; ########## Actions of x loop begin ##########
             
                 ; Compute offset2
                 imul    eax, 3
@@ -168,23 +168,23 @@ FirstIteration proc args     :PARAMS,
                     cmp     eax, args.maskSize
                     jge     @kLoopEnd
 
-                    ; ########## Actions of k loop begins ##########
+                    ; ########## Actions of k loop begin ##########
 
                     ; Offsets init part
-                    movd      XMM1, dword ptr [esi]
-                    punpcklbw XMM1, XMM0
-                    punpcklwd XMM1, XMM0
+                    movd      XMM1, dword ptr [esi]        ; Move 4 bytes (3 used) to the XMM1
+                    punpcklbw XMM1, XMM0                   ; XMM1: ...00 rr gg bb         -> ...0000 00rr 00gg 00bb 
+                    punpcklwd XMM1, XMM0                   ; XMM1: ...0000 00rr 00gg 00bb -> 00000000 000000rr 000000gg 000000bb
 
                     ; Mask init part
-                    movd      XMM2, dword ptr [ecx][eax*4] ; k in eax
-                    shufps    XMM2, XMM2, 0h
+                    movd      XMM2, dword ptr [ecx][eax*4] ; Move mask for the current pixel to XMM2
+                    shufps    XMM2, XMM2, 0h               ; Broadcast least significant element to all elements 
 
-                    pmullw    XMM1, XMM2 ; Multiply offset2[0,1,2] * mask[k]
-                    paddw     XMM3, XMM1 ; Linc[b,g,r] += offset2[0,1,2] * mask[k]
+                    pmullw    XMM1, XMM2                   ; Multiply offset2[0,1,2] * mask[k]
+                    paddw     XMM3, XMM1                   ; Linc[b,g,r] += offset2[0,1,2] * mask[k]
 
                     add     esi, rowPadded
                 
-                    ; ########## Actions of k loop ends #########
+                    ; ########## Actions of k loop end #########
                     ; Increment k counter
                     mov     eax, k
                     inc     eax
@@ -196,31 +196,31 @@ FirstIteration proc args     :PARAMS,
                 mov     esi, tempImg ; Esi now stores tempImg ptr
 
                 ; Save b pixel
-                pextrw  eax, XMM3, 0
-                cwd
-                cdq
-                div    gaussSum
-                mov     byte ptr [esi][edi], al
-                inc     edi
+                pextrw  eax, XMM3, 0             ; Extract blue factor
+                cwd                              ; Convert to double
+                cdq                              ; Convert to quad
+                div    gaussSum                  ; Divide by the sum of gauss mask factors
+                mov     byte ptr [esi][edi], al  ; Save in temporary array
+                inc     edi                      ; Move to the next pixel of the temp array
 
                 ; Save g pixel
-                pextrw  eax, XMM3, 2
-                cwd
-                cdq
-                div    gaussSum
-                mov     byte ptr [esi][edi], al
-                inc     edi
+                pextrw  eax, XMM3, 2             ; Extract green factor
+                cwd                              ; Convert to double
+                cdq                              ; Convert to quad
+                div    gaussSum                  ; Divide by the sum of gauss mask factors
+                mov     byte ptr [esi][edi], al  ; Save in temporary array
+                inc     edi                      ; Move to the next pixel of the temp array
 
-                ; Save r pixel
-                pextrw  eax, XMM3, 4
-                cwd
-                cdq
-                div    gaussSum
-                mov     byte ptr [esi][edi], al
-                inc     edi
+                ; Save r pixel 
+                pextrw  eax, XMM3, 4             ; Extract red factor
+                cwd                              ; Convert to double
+                cdq                              ; Convert to quad
+                div    gaussSum                  ; Divide by the sum of gauss mask factors
+                mov     byte ptr [esi][edi], al  ; Save in temporary array
+                inc     edi                      ; Move to the next pixel of the temp array
 
 
-                ; ########## Actions of x loop ends #########
+                ; ########## Actions of x loop end #########
                 ; Increment x counter
                 mov     eax, x
                 inc     eax
@@ -249,7 +249,7 @@ FirstIteration proc args     :PARAMS,
                 cmp     eax, args.imgWidth
                 jge     @x2LoopEnd
 
-                ; ########## Actions of x loop begins ##########
+                ; ########## Actions of x loop begin ##########
 
                 mov     ebx, tempImg
 
@@ -270,7 +270,7 @@ FirstIteration proc args     :PARAMS,
 
                 add     esi, 3
 
-                ; ########## Actions of x loop ends #########
+                ; ########## Actions of x loop end #########
                 ; Increment x counter
                 mov     eax, x
                 inc     eax
@@ -282,7 +282,7 @@ FirstIteration proc args     :PARAMS,
 
         add     edi, rowPaddedDiff
     
-        ; ########## Actions of y loop ends ##########
+        ; ########## Actions of y loop end ##########
         ; Increment y counter
         mov     eax, y
         inc     eax
@@ -377,7 +377,7 @@ SecondIteration proc args     :PARAMS,
         cmp     eax, endCopy
         jge     @yLoopEnd
 
-        ; ########## Actions of y loop begins ##########
+        ; ########## Actions of y loop begin ##########
 
         ; Compute offset1
         imul    eax, rowPadded ; Eax = y * rowPadded
@@ -396,7 +396,7 @@ SecondIteration proc args     :PARAMS,
                 cmp     eax, args.imgWidth
                 jge     @x1LoopEnd
 
-                ; ########## Actions of x loop begins ##########
+                ; ########## Actions of x loop begin ##########
 
                 ; Compute currX
                 mov     esi, eax
@@ -425,22 +425,23 @@ SecondIteration proc args     :PARAMS,
                         cmp     eax, args.maskSize
                         jge     @kLoopEnd
 
-                        ; ########## Actions of k loop begins ##########
+                        ; ########## Actions of k loop begin ##########
 
-                        ; Offsets init part
-                        movd      XMM1, dword ptr [ebx]
-                        punpcklbw XMM1, XMM0
-                        punpcklwd XMM1, XMM0
+						; Offsets init part
+						movd      XMM1, dword ptr [ebx]        ; Move 4 bytes (3 used) to the XMM1
+						punpcklbw XMM1, XMM0                   ; XMM1: ...00 rr gg bb         -> ...0000 00rr 00gg 00bb 
+						punpcklwd XMM1, XMM0                   ; XMM1: ...0000 00rr 00gg 00bb -> 00000000 000000rr 000000gg 000000bb
 
-                        ; Mask init part
-                        movd      XMM2, dword ptr [ecx][eax*4] ; k in eax
-                        shufps    XMM2, XMM2, 0h
+						; Mask init part
+						movd      XMM2, dword ptr [ecx][eax*4] ; Move mask for the current pixel to XMM2
+						shufps    XMM2, XMM2, 0h               ; Broadcast least significant element to all elements 
 
-                        pmullw    XMM1, XMM2 ; Multiply offset2[0,1,2] * gaussMask[k]
-                        paddw     XMM3, XMM1 ; linc[b,g,r] += offset2[0,1,2] * gaussMask[k]
+						pmullw    XMM1, XMM2                   ; Multiply offset2[0,1,2] * mask[k]
+						paddw     XMM3, XMM1                   ; Linc[b,g,r] += offset2[0,1,2] * mask[k]
+
                         add     ebx, 3
                 
-                        ; ########## Actions of k loop ends #########
+                        ; ########## Actions of k loop end #########
                         ; Increment k counter
                         mov     eax, k
                         inc     eax
@@ -451,29 +452,29 @@ SecondIteration proc args     :PARAMS,
 
                     mov     esi, imgOffset ; Esi now stores imgOffset
 
-                    ; Save b pixel
-                    pextrw  eax, XMM3, 0
-                    cwd
-                    cdq
-                    div    gaussSum
-                    mov     byte ptr [esi][edi], al
-                    inc     edi
+					; Save b pixel
+					pextrw  eax, XMM3, 0             ; Extract blue factor
+					cwd                              ; Convert to double
+					cdq                              ; Convert to quad
+					div     gaussSum                 ; Divide by the sum of gauss mask factors
+					mov     byte ptr [esi][edi], al  ; Save in temporary array
+					inc     edi                      ; Move to the next pixel of the destination array
 
-                    ; Save g pixel
-                    pextrw  eax, XMM3, 2
-                    cwd
-                    cdq
-                    div    gaussSum
-                    mov     byte ptr [esi][edi], al
-                    inc     edi
+					; Save g pixel
+					pextrw  eax, XMM3, 2             ; Extract green factor
+					cwd                              ; Convert to double
+					cdq                              ; Convert to quad
+					div     gaussSum                 ; Divide by the sum of gauss mask factors
+					mov     byte ptr [esi][edi], al  ; Save in temporary array
+					inc     edi                      ; Move to the next pixel of the destination array
 
-                    ; Save r pixel
-                    pextrw  eax, XMM3, 4
-                    cwd
-                    cdq
-                    div    gaussSum
-                    mov     byte ptr [esi][edi], al
-                    inc     edi
+					; Save r pixel 
+					pextrw  eax, XMM3, 4             ; Extract red factor
+					cwd                              ; Convert to double
+					cdq                              ; Convert to quad
+					div     gaussSum                 ; Divide by the sum of gauss mask factors
+					mov     byte ptr [esi][edi], al  ; Save in temporary array
+					inc     edi                      ; Move to the next pixel of the destination array
 
                 ; -------------------------------------------------------------------------
                 ; If |current pixel X position - gaussHalf| is not in bounds of data array
@@ -506,7 +507,7 @@ SecondIteration proc args     :PARAMS,
 
                 .endif
 
-                ; ########## Actions of x loop ends #########
+                ; ########## Actions of x loop end #########
                 ; Increment x counter
                 mov     eax, x
                 inc     eax
@@ -517,7 +518,7 @@ SecondIteration proc args     :PARAMS,
 
             add     edi, rowPaddedDiff
 
-        ; ########## Actions of y loop ends ##########
+        ; ########## Actions of y loop end ##########
         ; Increment y counter
         mov     eax, y
         inc     eax
